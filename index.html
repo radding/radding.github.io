@@ -2,129 +2,13 @@
 <html>
 	<head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-		<title>My First BootStrap site!</title>
+		<title>Yoseph Radding | Builder Extraordinaire</title>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-        <style type="text/css">
-        	@media (min-width: 1024px){
-        		.desktop{
-        			height: 100vh;
-        		}
-        	}
-        </style>
+        <link rel="stylesheet" href="/static/css/main.css">
 	</head>
-	<body>
-		<nav class="navbar navbar-default">
-			<div class="container-fluid">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#nav_content" aria-expanded="false">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="#">Y. Radding</a>
-				</div>
-				<div class="collapse navbar-collapse" id="nav_content">
-					<ul class="nav navbar-nav">
-						<li class="active"> <a href="#about">About Me</a></li>
-						<li><a href="#projects"> Projects &amp; Experience</a></li>
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Contact Me<span class="caret"></span></a>
-	          				<ul class="dropdown-menu">
-	          					<li><a href="#contact">Email</a></li>
-	          					<li><a href="#contact">Website</a></li>
-	          					<li><a href="#contact">GitHub</a></li>
-	          				</ul>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</nav>
-
-		<div class="container-fluid desktop" id="about">
-			<div class="row">
-				<div class="col-md-2 hidden-sm"></div>
-				<div class="col-md-4">
-					<img class="img-responsive img-circle" src="me.GIF" alt="me" height="100%" width="100%" style="padding-top: 144px"/>
-				</div> 
-				<div class="col-md-4">
-					<center>
-						<h1>About Me</h1>
-						<p>My Name is Yoseph Radding. I am a full stack developer. I can do iOS, web development, python, systems programing, what ever is demanded of me. I'm really just trying to fill a lot of text so this looks cool!</p>
-						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pretium velit metus, non interdum dolor vestibulum fringilla. Morbi gravida condimentum consequat. Quisque a nunc nunc. Duis maximus rhoncus risus, vitae volutpat felis suscipit ut. Aenean sed diam id nibh congue mollis. Cras orci urna, tincidunt sed diam ut, maximus placerat est. Nunc sed maximus lacus, at dapibus lacus. Vivamus condimentum nunc enim, et ultricies metus elementum sit amet. Curabitur ac neque elementum, posuere justo non, convallis metus. Sed faucibus, mauris sit amet consequat ullamcorper, eros felis ullamcorper eros, ut mollis erat libero vel ligula. Morbi et vulputate dui. Phasellus cursus pulvinar turpis, nec tincidunt mi feugiat quis. Aliquam erat volutpat. Fusce pretium, metus ac volutpat sodales, justo nibh placerat lorem, eget auctor nibh nibh ut dui.</p>
-						<p>I am also making this site as an example for bootstrap</p>
-					</center>
-				</div>
-				<div class="col-md-2 hidden-sm"></div>
-			</div>
-		</div>
-
-		<div class="container-fluid desktop" id="projects">
-			<div class="row">
-				<div class="col-md-12">
-					<center style="padding-bottom:50px"><h1>Projects &amp; Experience</h1></center>
-					<div class="row"> 
-						<div class="col-md-4">
-							<h3>Barracuda Networks - Intern</h3>
-							<p>Worked on the cloud appliance for the mail archiver. I built a support tool to allow Support to look up and verify customer info. I upgraded the libraries and dependencies used by the entire systems. This included building modules that mimicked behaviour that was no longer supported. Also made various bug fixes and tools.</p>
-						</div>
-						<div class="col-md-4">
-							<h3>LykeMe - Founder</h3>
-							<p>A social media site that matches people in your area based on shared intrests. Designed and built the backend architecture and code to support the app. Led the development of the front end as well as the back end. Built in iOS and python</p>
-						</div>
-						<div class="col-md-4">
-							<h3>Card Tracker</h3>
-							<p>A web crawler that searches the web for pictures with credit card numbers in them, and then alerts the respective issuers to notify that the number was found online. Uses OCR built using openCV and tesseract. Built using C++ and Python</p>
-						</div>
-					</div>
-					<div class="row"> 
-						<div class="col-md-4">
-							<h3>Pigmnt</h3>
-							<p>An iPhone App that tracks colors using the camera and in real time. Can be used with the google cardboard for augmented vision. It uses openCV to find the colors, trace the outline and build a box around the outline. Built in C++, Objective-C, and Objective-C++.</p>
-						</div>
-						<div class="col-md-4">
-							<h3>Turnd-On</h3>
-							<p>A social media application that is based soley on text messaging. A user subscribes to a "channel" and will recieve text messages when some one posts (texts) to this group. Built using Python.</p>
-						</div>
-						<div class="col-md-4">
-							<h3>Space odyssey</h3>
-							<p>A Virtual Reality game built using the Unity game engine, supporting network game play. It uses the occulus rift and google card board for the graphics and a myo guesture recognizer as a controller. Built using C# and Java.</p>
-						</div>
-					</div>
-
-					<div class="row"> 
-						<div class="col-md-4">
-							<h3>HIT web team - Web Developer</h3>
-							<p>Built and mainted web sites at MSU Health IT. Set up proper testing enviroments and designed the modules for the sites. Used technologies such as C#, XSL/XML, HTML, CSS, JavaScript, jQuery, and PHP.</p>
-						</div>
-						<div class="col-md-4">
-							<h3>Battle Bots</h3>
-							<p>A Robot that was built using Raspberry Pis and arduinos that supported Streaming of video over a network and controllable using the MYO guesture controller. Built using C, Python and Java.</p>
-						</div>
-						<div class="col-md-4">
-							<h3>Spartahack Website</h3>
-							<p>Built the website for Spartahack 1. It included a Content management system. Also set text messages to mentors and allowed us to make push notifications to iOS devices. Built using Python (django).</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="container-fluid desktop" style="padding-top:40vh;" id="contact">
-			<div class="row">
-				<div class="col-md-12">
-					<center>
-						<h1>Contact Me</h1>
-						<div class="row">
-							<div class="col-md-4">Email: raddingy@msu.edu</div>
-							<div class="col-md-4">GitHub: https://github.com/radding</div>
-							<div class="col-md-4">Website: yosephradding.com</div>
-						</div>
-					</center>
-				</div>
-			</div>
-		</div>
-	</body>
-</html>
+    <body>
+        <div id="game_container">
+        </div>
+    </body>
