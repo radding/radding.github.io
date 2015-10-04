@@ -1,5 +1,80 @@
 #game_container{
+    top: 0;
     width:100vw;
     height:100vh;
-    background-color:#0DB14B;
+    /*background-color:#0DB14B;*/
+    background-position: center;
+    background-repeat:no-repeat;
+    background-image: url(../img/startBackground.png);
+    position: absolute;
+    z-index:-10000;
+    overflow: hidden;
+}
+
+#startMenuContainer{
+    position: absolute;
+    z-index: 100000;
+}
+
+#startMenu{
+    width: 50vw;
+    height: 50vh;
+    background-color:#CB5A28;
+    -webkit-box-shadow: 20px 17px 34px -3px rgba(0,0,0,0.43);
+    -moz-box-shadow: 20px 17px 34px -3px rgba(0,0,0,0.43);
+    box-shadow: 20px 17px 34px -3px rgba(0,0,0,0.43);
+    z-index: 100001;
+    position: relative;
+}
+
+.brand{
+    font-family: 'VT323';
+    color: #E8D9B5;
+    text-align: center;
+    font-size: 40pt;
+}
+
+h2.brand{
+    color: #CB5A28;
+    font-size: 43.236pt;
+}
+
+.brand.main{
+    font-family: 'Press Start 2P', cursive;
+    top:5vh;
+    padding-bottom:6vh;
+    position:relative;
+    font-size:50pt;
+    color: #CB5A28;
+}
+
+#mainBrandWrapper{
+    position: relative;
+}
+
+#startPosts{
+    background-image: url(../img/post.png);
+    background-repeat: no-repeat;
+    height: 207px;
+    width: 100%;
+    background-position: center;
+    z-index:-1;
+    margin-top:-100px;
+    position: relative;
+}
+
+#startSky {
+    z-index:-10;
+    height: 70%;
+    position: relative;
+    width: 100;
+    background-color: blue;
+}
+
+#startGround {
+    z-index:-11;
+    height:30%;
+    position: relative;
+    width: 100%;
+    background-color: brown;
 }
