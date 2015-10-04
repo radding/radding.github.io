@@ -1,3 +1,7 @@
+body {
+    font-family: 'VT323';
+}
+
 #game_container{
     top: 0;
     width:100vw;
@@ -19,16 +23,15 @@
 #startMenu{
     width: 50vw;
     height: 50vh;
-    background-color:#CB5A28;
+    /*background-color:#CB5A28;
     -webkit-box-shadow: 20px 17px 34px -3px rgba(0,0,0,0.43);
     -moz-box-shadow: 20px 17px 34px -3px rgba(0,0,0,0.43);
-    box-shadow: 20px 17px 34px -3px rgba(0,0,0,0.43);
+    box-shadow: 20px 17px 34px -3px rgba(0,0,0,0.43);*/
     z-index: 100001;
     position: relative;
 }
 
 .brand{
-    font-family: 'VT323';
     color: #E8D9B5;
     text-align: center;
     font-size: 40pt;
@@ -41,8 +44,8 @@ h2.brand{
 
 .brand.main{
     font-family: 'Press Start 2P', cursive;
-    top:5vh;
-    padding-bottom:6vh;
+    top:2vh;
+    padding-bottom:7vh;
     position:relative;
     font-size:50pt;
     color: #CB5A28;
@@ -77,4 +80,90 @@ h2.brand{
     position: relative;
     width: 100%;
     background-color: brown;
+}
+
+.pixel2 {
+  font-size: 25px;
+  color: white;
+  height: auto;
+  margin: 10px;
+  font-family: 'VT323';
+  
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  text-transform: uppercase;
+  
+  cursor: pointer;
+  
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.pixel2:active {
+  top: 2px;
+}
+
+.pixel2:hover{
+    background-color: #CB5A28;
+    color: green;
+}
+
+.pixel2 {
+  position: relative;
+  display: block;
+  margin: 10px;
+  font-family: 'VT323';
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 25px;
+  color: white;
+}
+
+.pixel2::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: -10px;
+  right: -10px;
+  background: black;
+  z-index: -1;
+}
+
+.pixel2::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: -6px;
+  right: -6px;
+  background: black;
+  z-index: -1;
+}
+
+.pixel2 {
+  padding: 10px 10px;
+  margin-left: 30px;
+  position: relative;
+  background: black;
+  width: 136px;
+  z-index: 2;
+}
+
+#startBtnGroup{
+    margin-top: 23vh;
+    left: -30px;
+    position: relative;
+    width: 114%;
+}
+
+.btn{
+    float: left;
 }

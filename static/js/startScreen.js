@@ -1,18 +1,50 @@
-
+function createBtn(text, id, optClass, onClick){
+    btnString = "<div class='pixel2 btn ";
+    if(optClass)
+        btnString += optClass + "'";
+    if(id)
+        btnString += "id='" + id + "'>";
+    btnString += text + "</div>";
+    console.log(btnString);
+    var btn = $(btnString);
+    btn.on("click", onClick);
+    return btn;
+}       
 
 function buildStart(callBack){
     var positionX = $(window).width() / 2 - $(window).width()/4;
     var positionY = $(window).height()/2 - 120;
     var menuContainer = $("<div id='startMenuContainer'></div>");
     var menu = $("<div id='startMenu'></div>");
-    var posts = $("<div id='startPosts'></div>");
     menuContainer.css("top", positionY);
     menuContainer.css("left", positionX);
-    menu.append($("<center><h3 class='brand'>Coming Soon!</h3></center>"));
+    var buttonGroup = $("<div id='startBtnGroup'></div>");
+    //var startBtn = $("<div class='pixel2 btn' id='startGame'>Start!</div>");
+    
+    var startBtn = createBtn("Start!", "startGame", null, function(){
+
+    });
+    buttonGroup.append(startBtn);
+
+    var howTo = createBtn("How To Play", "howTo", null, function(){
+
+    });
+    buttonGroup.append(howTo);
+
+    var about = createBtn("About", "about", null, function(){
+
+    });
+    buttonGroup.append(about);
+
+    var contact = createBtn("Contact", "contact", null, function(){
+
+    });
+    buttonGroup.append(contact);
+    
+    menu.append(buttonGroup);
     $("#start_elements").append(menuContainer);
     menuContainer.append(menu);
     menuContainer.append(posts);
-    TweenMax.from(menuContainer, 1, {"y" : "1500" });
 }
 
 
