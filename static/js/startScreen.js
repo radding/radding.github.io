@@ -1,15 +1,18 @@
 function createBtn(text, id, optClass, onClick){
-    btnString = "<div class='pixel2 btn ";
+    var btnString = "<div class='pixel2 btn ";
     if(optClass)
-        btnString += optClass + "'";
+        btnString += optClass ;
+    btnString += "'";
     if(id)
-        btnString += "id='" + id + "'>";
-    btnString += text + "</div>";
+        btnString += "id='" + id + "'";
+    btnString += ">" + text + "</div>";
     console.log(btnString);
     var btn = $(btnString);
     btn.on("click", onClick);
     return btn;
 }       
+
+window.startMenuBtns = new Array();
 
 function buildStart(callBack){
     var positionX = $(window).width() / 2 - $(window).width()/4;
@@ -21,30 +24,33 @@ function buildStart(callBack){
     var buttonGroup = $("<div id='startBtnGroup'></div>");
     //var startBtn = $("<div class='pixel2 btn' id='startGame'>Start!</div>");
     
-    var startBtn = createBtn("Start!", "startGame", null, function(){
+    var startBtn = createBtn("Start!", "startGame", "focused", function(){
 
     });
     buttonGroup.append(startBtn);
+    window.startMenuBtns.push(startBtn);
 
     var howTo = createBtn("How To Play", "howTo", null, function(){
 
     });
     buttonGroup.append(howTo);
+    window.startMenuBtns.push(howTo);
 
     var about = createBtn("About", "about", null, function(){
 
     });
     buttonGroup.append(about);
+    window.startMenuBtns.push(about);
 
     var contact = createBtn("Contact", "contact", null, function(){
 
     });
     buttonGroup.append(contact);
+    window.startMenuBtns.push(contact);
     
     menu.append(buttonGroup);
     $("#start_elements").append(menuContainer);
     menuContainer.append(menu);
-    menuContainer.append(posts);
 }
 
 
@@ -54,6 +60,7 @@ function start(){
     var subTitle = $("h2.brand");
     subTitle.toggle();
     var bounceTime = 2;
+
     TweenLite.from(mainTitle, bounceTime, {y:"-500", ease:Bounce.easeOut, onComplete: function(){subTitle.fadeIn(); buildStart();}});
     TweenLite.from(mainTitleWrapper, bounceTime, {x: "-500"});
 }
@@ -107,7 +114,7 @@ function spawnAerial(){
     aerialObject.css("left", startLocation);
     var z = 1;
     if(!obj.canBeInFront)
-        z = Math.random() > .7 ? 1 : -1; 
+        z = Math.random() > .7 ? -1 : 1; 
     aerialObject.css("z-index", z * z_index);
     z_index--;
     if(z_index <= -100000)
@@ -121,7 +128,36 @@ function spawnAerial(){
 
 loc = false;
 z_index = 0;
+btnIndex = 0;
 $(document).on("update", function(){
     if(Math.random() > .95)
         spawnAerial();
+    //if(!$(focusedButton).hasClass(".focused"))
+});
+
+$(document).on("rightArrowKeyDown", function(){
+    var btn = window.startMenuBtns[btnIndex];
+    btn.removeClass("focused");
+    btnIndex = (btnIndex + 1) % window.startMenuBtns.length;
+    btn = window.startMenuBtns[btnIndex];
+    btn.addClass("focused");
+});
+
+$(document).on("leftArrowKeyDown", function(){
+    var btn = window.startMenuBtns[btnIndex];
+    btn.removeClass("focused");
+    btnIndex--;
+    if(btnIndex < 0)
+        btnIndex = window.startMenuBtns.length - 1;
+    btn = window.startMenuBtns[btnIndex];
+    btn.addClass("focused");
+});
+
+$(document).on("enterKeyDown", function(){
+    var btn = window.startMenuBtns[btnIndex];
+    btn.trigger("click");
+    btn.addClass("clicked");
+    setTimeout (function(){
+        btn.removeClass("clicked");
+    }, 100);
 });

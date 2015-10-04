@@ -104,11 +104,11 @@ h2.brand{
   user-select: none;
 }
 
-.pixel2:active {
+.pixel2:active, .clicked {
   top: 2px;
 }
 
-.pixel2:hover{
+.pixel2:hover, .pixel2.focused {
     background-color: #CB5A28;
     color: green;
 }
