@@ -2113,8 +2113,8 @@ cite {
     .about .author .author_info {
       padding: 0;
       text-align: center; }
-      .about .author .author_info p.author_subtitle.needsBottom {
-        margin-bottom: 10em; }
+      .about .author .author_info div.author_subtitle.needsBottom {
+        margin-bottom: 30em; }
   .about .about_social {
     border-radius: 0.5rem;
     overflow: hidden; }
