@@ -2090,7 +2090,7 @@ cite {
   max-width: 90%;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -30%);
+  transform: translate(-50%, -10%);
   overflow: auto; }
 
 .about {
@@ -2101,7 +2101,8 @@ cite {
   background-image: url(../img/bg_about.jpg);
   background-size: cover;
   background-position: 50% 50%;
-  background-repeat: no-repeat; }
+  background-repeat: no-repeat;
+  background-attachment: fixed; }
   .about .author {
     border-radius: 0.5rem;
     margin-bottom: 1rem; }
@@ -2112,6 +2113,8 @@ cite {
     .about .author .author_info {
       padding: 0;
       text-align: center; }
+      .about .author .author_info p.author_subtitle {
+        margin-bottom: 200; }
   .about .about_social {
     border-radius: 0.5rem;
     overflow: hidden; }
