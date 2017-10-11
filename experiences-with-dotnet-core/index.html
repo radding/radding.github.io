@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Experiences with .NET Core - Yoseph.TECH | All things Tech</title>
+	<meta name="description" content="I've been playing around with .NET core for the past few weeks. This is my  experience with it.">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#d25469">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#d25469">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  
+<header class="main_header">
+  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
+  <nav class="main_menu">
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+</header> <!-- End Section Header -->
+
+<main class="post_content">
+  <article class="post">
+    <header>
+      <div class="post_image">
+        <img src=/assets/img/net-core-logo.jpg alt="Experiences with .NET Core">
+      </div>
+      <div class="post_description">
+        <p class="post_meta">2017, Feb 09</p>
+        <h1 class="post_title">Experiences with .NET Core</h1>
+      </div>
+    </header> <!-- End Header -->
+
+    <div class="entry_content">
+      <p>For the past three weeks, I have been using .NET Core. Before this, I have had about 4–5 years experience building applications in ASP.NET and writing Unity3D games in C# for about the same out of time. Although it wouldn’t be my first choice for a project, that honor goes to Python, I actually enjoy using C#.
+Up until this point, ASP.NET was for windows development only. True, C# was available for on Linux and Mac OSX through various technologies, like Mono or Unity3D (Unity on my Mac is what introduced me to C# actually). But anyone who has used those technologies can probably attest that these technologies weren’t as good as their Microsoft counterparts. So when I heard about Microsoft’s intent to open source .NET Core and make it cross platform, I pledged to try it.
+Fast forward a year, I have finally decided to try .NET Core. I’ll admit I was excited. None of the computers I own are Windows machines, although my work machine has a Windows 7 VM. So I set about installing .NET on my on Linux Mint laptop, My Macbook Pro, and my iMac. Surprisingly, the Linux install was the smoothest install in the bunch. I ran the commands and it just worked. On Mac, however, there was one extra step you have to run, which is outlined in Known Problems under Users of zsh, though that could be because of I am using Mac OSX 10.10.
+After getting everything installed, I obviously started playing around with the technology. It was decent. Out of the box, they give you plenty of commands to get started quickly. I didn’t like the way they laid out a web project, but again, I prefer Flask for my web development needs. I felt that the base project was too large and bloated, which is an obvious concussion if you ever used and enjoyed Flask. I don’t like how opaque passing data from the view to the controller was, and how ASP.NET selected the Template file. I like explicitly passing parameters to a function. It just makes me feel like I have more control. These annoyances are nothing compared to the other issues I faced, however.
+The next problem I faced was how to add a library to the project, AKA linking a library to the project. The documentation on this is lacking to say the least. Most .NET packages will tell you to install packages via NuGet. However, NuGet doesn’t work very well with .NET Core. Firstly, it throws up packages that you install via nuget install into your current directory, causing a nightmare for git. I actually had to close a teammate’s Pull Request because he mistakenly ran NuGet several times. In order to install a package, you must put the package and version in the dependencies section of your project.json and then run dotnet restore,which actually uses NuGet under the hood. Nowhere does the documentation make this readily apparent.
+With that sorted, I moved on to attempting to share a library that my team built to facilitate a micro-services architecture we are developing. This library is basically our data access layer for our various services. Words can not convey how frustrating this process was. You can not just build your project as a library, share the build and then pass a flag to link the library like you can in C/C++. Or at least the documentation doesn’t describe a way to do this. In order to achieve this, you must build your library as a NuGet package, deploy the package to a NuGet server, and then follow the same process as any other package. Usually, you could simply have a local directory with NuGet packages in it and point NuGet’s sources to the directory. But this package needed to be shared with my team across multiple computers (I myself have 4 computers that I cycle between), and this package couldn’t be public. So I decided to roll our own NuGet Server. I used this Simple-Nuget-Server, which came with its own can of worms. With that done, I just had to point the NuGet sources to the server, which was the easiest part of the process.
+When I had all of these systems in place, I decided to tackle Continuous integration for our project. Initially, this was simple to do. I just wrote makefiles to get everything automated on all of our computers and just invoked those in our continuous integration scripts. This worked fine, until Monday. To set the stage, I must disclose that we are using GitLab (self hosted, thank god) and the built in GitLab CI tools. The CI runner we are using is based off of docker so that we get a clean environment for our builds. The docker image that we used was microsoft/dotnet:latest. I mistakenly believed that Microsoft wouldn’t release a change that breaks the underlying build system of .NET. But alas, they did. On Monday, they released a new Docker Image that removed support for project.json and replaced it with MSBuild, which depends on .csproj files. This of course was an easy fix. I simply changed the image back and that was that. The infuriating part is that they decided to scrap project.json and move back to the .csproj files, which existed before .NET core. Which, many would tell me isn’t that big of a deal.
+But what infuriates me is this reliance on these settings file. Don’t get me wrong, I love files that hold my settings or automate building. All of my deployed Python apps rely on an ini file to initialize the WSGI server, all of my C++ projects have a makefile that hold all of the commands I need. In a way, I rely on these build systems and settings files. But what the major difference between make files or ini files and project.json files is that they aren’t needed. The ini files I use for my wsgi apps are simply stand-ins for arguments for command line arguments. For example I can replace this wsgi invocation: wsgi -protocol=http -port=5000 -workers=22 -listen=0.0.0.0 -vacuum=true with wsgi -ini=settings.ini. I’ll be honest, I’m not even certain that the first invocation of wsgi is valid because I use the second one so often. It is very similar to my C++ files.
+The reliance on those files honestly make the .NET Core Command Line Interface feel hacked together. It is almost like Microsoft took the build system from Visual Studio and simply wrapped it in a command line interface. This is especially true now that they are moving back to .csproj files. In fact the reason they gave for the change is because they want to make it easier to port existing .NET projects to .NET core. This isn’t helped by the fact that there is little to no documentation from Microsoft on how to do a lot of operations through the command line interface. Most of the documentation explains how to perform the action through the Visual Studio Interface, which I don’t have access to on Linux, and it doesn’t work on my Mac computers. And the documentation that describes what you need to do, doesn’t feel very complete.
+.NET Core is definitely not as mature as many other platforms out there. Core is in this weird limbo where it has a very mature community and a good echo system but it doesn’t feel like it is mature because of this transition to Mac and Linux. It feels like Microsoft moved this platform to a new paradigm without properly adjusting to this new paradigm. Perhaps I expected to much from a language that is not even out of beta yet (all though I believe that they are testing rc4), but it really feels like a Windows product on a Unix system, which is less than ideal.
+Despite its numerous kinks, Core is still a cool platform. It has potential to be a pleasure to develop with. In my opinion, the biggest issue is the lackluster documentation, although that is a problem for Microsoft in general. I think with better documentation and nicer to work with command line tools for Unix, Core has great potential to be a great platform. I look forward to see where Core goes.</p>
+
+    </div>
+    
+    <div class="post_wrapper">
+      <footer class="post_footer cf">
+        <div class="post_share">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=Experiences with .NET Core&url=/experiences-with-dotnet-core/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://facebook.com/sharer.php?u=/experiences-with-dotnet-core/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://plus.google.com/share?url=/experiences-with-dotnet-core/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+        </div>
+        <div class="post_tag">
+          <span>Tags:</span>
+          
+          <a href="/tags#.NET" class="tag">.NET</a>
+          
+          <a href="/tags#.NET CORE" class="tag">.NET CORE</a>
+          
+          <a href="/tags#C#" class="tag">C#</a>
+          
+          <a href="/tags#Web" class="tag">Web</a>
+          
+          <a href="/tags#Technology" class="tag">Technology</a>
+          
+        </div>
+      </footer>
+    </div>
+  </article> <!-- End Section Post -->
+
+  <section class="author cf">
+    <div class="post_wrapper">
+      <div class="author_image">
+        <img src="/assets/img/face.jpg" alt="Author face">
+      </div>
+      <div class="author_info">
+        <h2 class="author_title">Yoseph Radding</h2>
+        <p class="author_subtitle">Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a **full blown Geek**.</p>
+        <div class="author_social">
+          
+          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
+          
+          
+          
+          <span class="author_phone"><i class="fa fa-phone" aria-hidden="true"></i> <a href="tel:+496-169-65-57">(496)-169-6557</a></span>
+          
+
+          
+          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="https://yoseph.tech" target="_blank">https://yoseph.tech</a></span>
+                      
+        </div>
+      </div>
+    </div>
+  </section> <!-- End Section Author -->
+
+  <section class="recent_box">
+    <div class="post_wrapper">
+      <h2 class="recent_title">Recent post</h2>
+      <div class="recent_list">
+        
+          
+            <a href="/experiences-with-dotnet-core/" class="recent_item" style="background-image: url( /assets/img/net-core-logo.jpg )"><span>Experiences with .NET Core</span></a>
+          
+        
+      </div>
+    </div>
+  </section> <!-- End Section Recent Box -->
+  
+  
+<section class="comment_area">
+  <div class="comment_wrapper">
+    
+  </div>
+</section> <!-- End Section Comment Area -->
+  
+</main> <!-- End Section Post Content -->
+
+
+<footer class="main_footer">
+  <div class="wrapper">
+    
+<ul class="social_footer">
+  
+  
+    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+  
+  
+  
+    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
+  
+  
+  
+  
+    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+  
+</ul>
+    <div class="copyright">
+      <p>&copy; 2017 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
+    </div>
+  </div>
+</footer> <!-- End Section Footer -->
+
+
+  
+<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
+  
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/jquery.vide.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+<!-- End Javascript -->
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-83670049-2', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
+</body>
+</html>
