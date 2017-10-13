@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Building A Raspberry Pi Arcade Machine - Yoseph.TECH | All things Tech</title>
+	<meta name="description" content="I am starting to build a raspberry pi powered arcade machine. In this article, I will describe how I built a raspberry pi arcade console.">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#d25469">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#d25469">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  
+<header class="main_header">
+  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
+  <nav class="main_menu">
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+</header> <!-- End Section Header -->
+
+<main class="post_content">
+  <article class="post">
+    <header>
+      <div class="post_image">
+        <img src=/assets/img/rpi_arcade1.png alt="Building A Raspberry Pi Arcade Machine">
+      </div>
+      <div class="post_description">
+        <p class="post_meta">2017, Oct 11</p>
+        <h1 class="post_title">Building A Raspberry Pi Arcade Machine</h1>
+      </div>
+    </header> <!-- End Header -->
+
+    <div class="entry_content">
+      <p>A couple of weeks ago I went to <a href="http://thegridoldtown.com/" target="_blank">this</a> barcade in Lansing Michigan. Being the huge nerd that I am, I decided that I wanted to play these games all the time.</p>
+
+<figure>
+  <img src="/assets/img/me_nerd.png" alt="*Me, a complete nerd*" class="small" />
+  <figcaption><p><em>Me, a complete nerd</em></p>
+</figcaption>
+</figure>
+
+<p>The problem is, Arcade machines are expensive and I couldn’t get my hands on one that day. So I did the next best thing: I found a raspberry pi I had laying around and fished out an old USB XBoX controller I had laying around and so <span style="text-decoration:underline">Yoseph’s Arcade™</span> was born.</p>
+
+<p>In this article, I will walk you through the entire process from setting up your Raspberry Pi to transforming it into a relatively cheap retro console.</p>
+
+<h2 id="first-up-the-hardware">First up, the Hardware</h2>
+
+<h3 id="raspberry-pi">Raspberry Pi</h3>
+
+<p>The most obvious piece of hardware I used was a <a href="https://www.raspberrypi.org/" target="_blank">raspberry pi</a>. For those of you who don’t know what a Raspberry Pi is, it is a credit card sized machine priced at an affordable $35 dollars.</p>
+
+<figure>
+  <img src="/assets/img/RPi3.jpg" alt="A Raspberry Pi 3, Image courtesy of google" class="" />
+  <figcaption><p><em>A Raspberry Pi 3, Image courtesy of google</em></p>
+</figcaption>
+</figure>
+
+<p>I used a Raspberry Pi 3 for this project, though this would probably work on a Raspberry Pi 2. I am not 100% sure about how a Raspberry Pi 1 would work, but I am deeply skeptical that it would work well. I have an RPi one set up at work to run Google’s timer and that is barely responsive. If you get this working on a Rpi 1, let me know! I would love to hear about it.</p>
+
+<p>There are some differences between the RPi 3 and RPi 2 and RPi 1. The RPi 3 and 2 both use Microsd cards instead of the one’s Regular size SD card.</p>
+
+<figure>
+  <img src="/assets/img/MicrSDandRegSDSizeComparison.jpg" alt="Micro SD compared to a Regular SD card" class="small" />
+  <figcaption><p><em>Micro SD compared to a Regular SD card</em></p>
+</figcaption>
+</figure>
+
+<p>The RPi3 boast a 1.2 GHz 64 bit Arm Processor while the Raspberry Pi 2 has a 900 MHz processor and 32 bit architecture (RPi 2 version 1.2 does have a 64 bit processor) and the Raspberry Pi 1 has a 700 MHz processor and only 512 or 256 MB RAM.</p>
+
+<p>However I think the most important details to consider here are the number of USB ports and the networking capabilities. The more USB ports the device has, the more people you can play with. The Pi 2 and Pi 3 both have 4 USB ports while the Pi 1 only has two ports. While the Pi 2 and Pi 3 both have 4 USB hubs, the Pi 2 only has ethernet built onto the board, so if you want Wifi, you are going to need to buy a USB wifi adapter. The Pi 3 has a wifi chip built into the board, making it a cinch to connect to wifi. In fact this is the primary reason I went with the three over the two.</p>
+
+<p>If you need to buy a Raspberry Pi, I would checkout <a href="https://www.adafruit.com" target="_blank">adafruit.com</a>. I have bought many electronics from them and they are always reliable.</p>
+
+<p><a href="https://www.adafruit.com/product/3055?src=raspberrypi" target="_blank">Here is a direct link to the Pi I used for my arcade</a>.</p>
+
+<h3 id="sd-card">SD Card</h3>
+
+<p>This piece of hardware isn’t really that important all though, it is still important enough to mention. The Raspberry Pi uses a Micro SD card (Only applicable to the Pi 2 and 3) to hold the OS and it boots from this! The SD card should be at least 4 GB, but if you go with a bigger card, you get to store more games. One thing to keep in mind is that according to <a href="https://raspberrypi.stackexchange.com/questions/45312/is-there-any-limit-for-micro-sd-card-size-in-pi3" target="_blank">this stack exchange post</a>, there is a max supported size of 32 GB, although some people have gotten larger sizes working. If 32GB isn’t doing it for you, you can always use an external drive.</p>
+
+<p>The SD card I used was <a href="https://www.amazon.com/gp/product/B01H5ZNOYG/ref=oh_aui_detailpage_o06_s01?ie=UTF8&amp;psc=1" target="_blank">this</a> SD card I bought a while ago with NOOBS preloaded on it. To be honest, I don’t recommend this card for this application, because we are not going to be using NOOBS for anything, although it could be useful to make sure your Raspberry Pi boots correctly. You can buy a similar card for half the price, so I recommend that.</p>
+
+<h3 id="controllers">Controllers</h3>
+
+<p>This is the only major component that isn’t strictly needed; you can use a keyboard and mouse if you wanted to, but lets be honest, you need a controller for it to “feel” right . The only requirement is that it needs to be a USB device.</p>
+
+<p>There are a bunch of USB controllers. Searching for USB controllers on Amazon returns more than 50,000 results. So which one is right? That is entirely upto you. The controllers that I use are some cheap controllers from GameStop. Those controllers are pretty cool and cost me about $15 each.</p>
+
+<h3 id="miscellaneous">Miscellaneous</h3>
+
+<p>There are some additional hardware that you will need. If you already have a computer and a phone, then chances are you already have everything you need. You’ll need an HDMI cable for video and sound, USB mouse and keyboard for set up, a micro USB cable (the one that charges most android phones) and a 5.1V 2.5A power supply.</p>
+
+<p>Now that you have all of the hardware, let’s take a look at the software!</p>
+
+<h2 id="now-the-software">Now the software!</h2>
+
+<h3 id="the-operating-system-aka-the-os">The Operating System (AKA the OS)</h3>
+
+<figure>
+  <img src="https://retropie.org.uk/wp-content/uploads/2016/04/Retropie_Splash.png" alt="The RetroPie Logo" class="" />
+  <figcaption><p><em>RetroPie Logo</em></p>
+</figcaption>
+</figure>
+
+<p>For the OS, we will be using <a href="https://retropie.org.uk/" target="_blank">RetroPie</a>. Make sure to go to <a href="https://retropie.org.uk/download/" target="_blank">this page and download the latest version of RetroPie</a>. RetroPie is a great little OS that can emulate over 50 consoles and computers including NES, SNES, PS1 and PS2. <a href="https://retropie.org.uk/about/systems/" target="_blank">Here is a full list of platforms it supports out of the box</a>. It also is built with a media center <a href="https://kodi.tv/" target="_blank">kodi</a> that will allow you to stream your own media to your TV.</p>
+
+<p>Before moving on I wanted to touch on a few things. The Raspberry Pi Foundation recommends installing NOOBS and officially supports an OS called Rasbian, both of which can be downloaded <a href="https://www.raspberrypi.org/downloads/" target="_blank">here</a>. NOOBS is definitely the easist way to set up a Raspberry Pi. However, for this, we aren’t going to us NOOBS because the operating system we need is not on there. (<em>Note: <a href="https://github.com/raspberrypi/noobs/" target="_blank">NOOBS</a> is not really an OS, it is really just an Operating system installer. If you are doing any other project, I recommend using NOOBS</em>)</p>
+
+<p>I should also mention that NOOBS does ship with an OS you can install called <a href="https://www.recalbox.com/" target="_blank">RecalBox</a>, and if it doesn’t anymore, it is extremely easy to set up. I did try this OS before installing RetroPie, but I didn’t like it. RetroPie and RecalBox are very similar. They both are based on RetroArch and EmulationStation to provide the emulators, both have Kodi installed, and both provide online updates, rewinding, save states, and screenshots. Hell they even look the same!</p>
+
+<figure>
+  <img src="http://www.emulationstation.org/assets/featurettes/full/theming_system.png" alt="RetroPie or RecalBox UI" class="" />
+  <figcaption><p><em>Retropie or RecalBox? You honestly can not tell!</em></p>
+</figcaption>
+</figure>
+
+<p>However, RetroPie offers much more control over the system. You can change it’s splash screen, what version of Linux it runs (it runs Rasbian by default) and tinker with every single setting. I routinely SSH into my RetroPie to monkey around with stuff (not that I would recommend this, unless you know what you are doing). This may seem extremely overwhelming, but RetroPie provides <a href="https://retropie.org.uk/docs/" target="_blank">excellent and extensive documentation</a>, while RecalBox does not.</p>
+
+<p>After you download RetroPie, you’ll need to unzip the fill using 7zip. You’ll be left the the img which is the actual OS.</p>
+
+<h3 id="a-sd-card-writer">A SD card writer</h3>
+
+<p>This is really a simple step to just set up the SD Card to install the OS. I used <a href="https://etcher.io/" target="_blank">this program called Etcher</a> to burn the iso to an SD card. If you really want to, you can use dd if your are running MacOS or Linux, although I won’t give any instruction on this because I can not remember the flags.</p>
+
+<figure>
+  <img src="https://imgs.xkcd.com/comics/tar.png" alt="relevant XKCD" class="" />
+  <figcaption><p><em>There really</em> is <em>a relevant XKCD for everything</em></p>
+</figcaption>
+</figure>
+
+<h3 id="roms-roms-and-more-roms">ROMs, ROMs, and more ROMs!</h3>
+
+<p>In order to actually play the games, you’ll need <a href="https://en.wikipedia.org/wiki/ROM_image" target="_blank">ROMs</a>. Each game will have a ROM associated with it. However, I must point out that it is illegal to download the ROMs of games you don’t legally own. Finding the ROMs of games you legally own is really easy. You just google your game title and add ROM after it. If the game was added for multiple consoles, you may want to also specify which console you are looking for.</p>
+
+<figure>
+  <img src="/assets/img/googleSearch.png" alt="Finding the ROM for Super Mario Bros" class="" />
+  <figcaption><p><em>Finding the ROM for Super Mario Bros</em></p>
+</figcaption>
+</figure>
+
+<p>This step could be a bit sketchy, so just remember to exercise caution and not to run any of these programs on your actual machine unless you thoroughly inspect the file.</p>
+
+<h3 id="a-program-to-transfer-files-to-the-raspberry-pi">A program to transfer files to the Raspberry Pi</h3>
+
+<p>If you own a Mac or windows, you can use Finder or Explorer (respectively). On Linux, I just use good old SFTP and SSH to manage everything.</p>
+
+<h2 id="now-lets-put-everything-together">Now lets put everything together!</h2>
+
+<p>So now that all of the hardware has been gathered and all of the required software has been downloaded, we can actually begin building our Arcade!</p>
+
+<p>The first step is to double check that the RetroPie file you downloaded earlier is a <code class="highlighter-rouge">.img</code> file. If the extension is <code class="highlighter-rouge">.img</code> you’re good to go. But if it is <code class="highlighter-rouge">.7z</code> or <code class="highlighter-rouge">.zip</code> you need to extract the file. I think RetroPie only allows you to download <code class="highlighter-rouge">.7z</code> files. To uncompress <code class="highlighter-rouge">.7z</code> files, you’ll need <a href="http://www.7-zip.org/" target="_blank">7-zip</a> (for windows) or <a href="https://theunarchiver.com/" target="_blank">the unarchiver</a> if you’re using a Mac.</p>
+
+<p>Now that you are absolutely sure that RetroPie is good to go, lets “burn” the image to the SD card. Burning the image is a process where the target disk (in this case your SD card) gets an exact copy of the <code class="highlighter-rouge">.img</code> file. The <code class="highlighter-rouge">.img</code> file itself is an “image” (think of it like taking a picture, the picture is frozen in time.) of what a hard drive of a device running the image would look like. You can’t simply copy the files to the SD card (unless you are using NOOBS or something similar) because it doesn’t make the card an exact copy of the image. Computers, and indeed the Raspberry Pi, need this exact copy so that it can find the code that allows it to boot properly. Burning with Etcher is an extremely easy process:</p>
+<ol>
+  <li>Make sure that the SD card is completely free of junk. Download <a href="https://www.sdcard.org/downloads/formatter_4/" target="_blank">The SD card association’s memory card format</a> if you are on Windows or Mac, or simply use gparted on linux. Set up the SD card as FAT and press go. Let it work on that and then move on.</li>
+  <li>Next we fire up Etcher. It’s pretty easy to use Etcher. First you need to select the image you want to burn (which should be something like retropie-4.3-rpi2_rpi3.img. This will be different depending on the RetroPie version and which Raspberry Pi version you downloaded this for). Next you select the drive you want to burn the Image to (this is the SD card). Finally, just press Flash and wait for Etcher to do it’s magic! When Etcher says it has finished, make sure that you eject the disk before removing it, you don’t want to accidentally corrupt the card because then you’ll have to redo these steps.</li>
+</ol>
+
+<p>After you are finished burning the image to the SD card, it is time to power up the Raspberry Pi! Firs what I would do is plug in the SD card. The SD card goes in the end opposite the USB ports. There is a little metal peice under the board that the card slides into with the pins facing the board.</p>
+
+<figure>
+  <img src="https://sailoog.gitbooks.io/openplotter-documentation/content/en/boot1.png" alt="You put the SD card here, under the board and opposite the USB ports" class="" />
+  <figcaption><p><em>Here is where the SD card goes into</em></p>
+</figcaption>
+</figure>
+
+<p>Next, plug in the HDMI cable to both your TV and Raspberry Pi, and turn on your TV. Next plug in your controller and mouse and keyboard. Finally just plug in the Micro USB cord into the Pi and the USB into your 5.1V 2.5A power supply and plug it into the wall.</p>
+
+<figure>
+  <img src="http://habrastorage.org/storage2/fb7/5b5/1da/fb75b51da92335e0ae9b11d660621b66.jpg" alt="Raspberry Pi Boot Screen" class="" />
+  <figcaption><p><em>If all goes well you should be greeted by this screen</em></p>
+</figcaption>
+</figure>
+
+<p>That screen will quickly be followed by a wall of scrolling text. Don’t fear! That is the actual Operating System booting up.</p>
+
+<figure>
+  <img src="https://i.kinja-img.com/gawker-media/image/upload/s--RFjS-T6S--/c_fill,fl_progressive,g_center,h_450,q_80,w_800/dfzybkr8hbtaqmvdfkus.png" alt="Rasbian Boot and Login Sequence" class="" />
+  <figcaption><p><em>Rasbian booting up!</em></p>
+</figcaption>
+</figure>
+
+<p>Finally, when that is done, you’ll see the splash screen of RetroPie and then finally nothing but a RetroPie entry in some sort of menu. On initial boot, RetroPie will detect your controller and ask you to configure it.</p>
+
+<figure>
+  <img src="https://cdn.instructables.com/FBU/VUT7/J5Y81XXG/FBUVUT7J5Y81XXG.MEDIUM.jpg" alt="Configure your controller" class="" />
+  <figcaption><p><em>Configure your controller</em></p>
+</figcaption>
+</figure>
+
+<p>Press any button to continue. RetroPie will ask you to press the buttons on the controller so that it can recognize this. If you mess up, you can always come back and reconfigure if you want to. You can also use the mouse and keyboard to navigate, all though RetroPie will automatically go to the next entry.</p>
+
+<p>With your controller in hand, simply select the RetroPie option (at this point it should be the only entry on the screen) and you should see this screen:</p>
+<figure>
+  <img src="https://cloud.githubusercontent.com/assets/10035308/9141387/7ed23ec0-3cf5-11e5-9944-a8f7870cc6c0.png" alt="RetroPie Setup Menu" class="" />
+  <figcaption><p><em>RetroPie Setup Menu</em></p>
+</figcaption>
+</figure>
+
+<p>Select configure Wifi. The next screen to be brought up isn’t exactly the prettiest, but it gets the job done.</p>
+<figure>
+  <img src="https://cloud.githubusercontent.com/assets/10035308/9141521/96ceb142-3cf6-11e5-9ba4-2b23a8b52480.png" alt="Wifi Screen" class="" />
+  <figcaption><p><em>WiFi Screen</em></p>
+</figcaption>
+</figure>
+
+<p>Go ahead and select your WiFi and enter your password using the keyboard.</p>
+
+<h3 id="with-that-done-you-are-now-officially-ready-to-start-playing-some-games">With that done, you are now officially ready to start playing some games!</h3>
+
+<p>Now there are several ways to get games to the RetroPie, from <a href="https://github.com/retropie/retropie-setup/wiki/Transferring-Roms#usb-stick" target="_blank">using a USB drive</a>, to <a href="https://github.com/retropie/retropie-setup/wiki/Transferring-Roms#manually-copy-files-from-usb-stick" target="_blank">manually using a USB drive</a>. The method I am going to focus on is using Samba.</p>
+
+<p>Samba is a program that allows you to access a computer’s files over a network. To access your RetroPie’s Samba Shares
+open up Explorer on Windows or Finder on MacOSX. In Explorer, in the address bar at the top, type <code class="highlighter-rouge">\\RETROPIE</code> and in Finder, click on <code class="highlighter-rouge">Go -&gt; Connect to Server</code> then type in <code class="highlighter-rouge">smb://retropie</code> and hit connect. If you are prompted for a password, it will be raspberry unless you changed it. I don’t think RetroPie actually puts a password on Samba.</p>
+
+<p>If you did that correctly, you should be connected and see a few directories.</p>
+
+<figure>
+  <img src="https://cloud.githubusercontent.com/assets/10035308/12865893/d2eab264-cc77-11e5-9ec6-003e13322a5a.png" alt="Connected and ready to upload ROMs" class="" />
+  <figcaption><p><em>Connected and ready to upload ROMs</em></p>
+</figcaption>
+</figure>
+
+<p>Now in the ROMs directory, there are several other directories. These directories correspond to the systems the ROMs inside can emulate. For example the <code class="highlighter-rouge">nes/</code> directory is for NES games, the <code class="highlighter-rouge">snes/</code> directory is for SNES games, so on and so forth. Just put your ROM in the right folder, reboot the Pi, and you should be good to go!</p>
+
+<h4 id="note-about-mame-games"><strong>Note about MAME games</strong>:</h4>
+
+<p><a href="http://mamedev.org/" target="_blank">MAME</a> is an emulator that emulates <strong><em>many</em></strong> arcade machines. This is what you want to use if want to play Donkey Kong, Ms. Pac Man, Galaga, etc. (But only if you own it, right?) However, MAME has different ROM sets and not every single game is supported through this system. <a href="https://github.com/RetroPie/RetroPie-Setup/wiki/Arcade" target="_blank">RetroPie recommends using lr-mame2003 and lr-fbalpha</a> but also has <a href="https://github.com/retropie/retropie-setup/wiki/MAME" target="_blank">these MAME emulators</a>. Most of my MAME games are using lr-mame2003, So I know those work.</p>
+
+<p>One thing to make sure of is that you <strong><em>absolutely, positively</em></strong> put the ROMs in the right directory. For any of my MAME games to work, I have to put them in the MAME directory which has a bunch of other directories (<code class="highlighter-rouge">cfg/</code> is the first one I can think of). These directories are important because these are what emulates the machine so that the ROM runs correctly. You should also be able to put them in the <code class="highlighter-rouge">arcade/</code> directory which has sub directories like <code class="highlighter-rouge">lr-mame2003/</code> which has the proper directories to run the ROMs. If that still doesn’t work, try to configure it to run a different emulator when you run the ROM. If that still doesn’t work, move the ROM around until it works.</p>
+
+<p><a href="https://docs.google.com/spreadsheets/d/1antILt7D12EWOFzyJwTfB86NceghMJKXG7CdYumuHec/edit#gid=0" target="_blank">There is also this list of compatable ROMS</a></p>
+
+<h2 id="the-wrap-up">The wrap up</h2>
+
+<p>That is really all there is to it! You’re now ready to play some retro games, but there may be somethings you may want to change, for a total price of $73:</p>
+<ol>
+  <li>Raspberry Pi: $35</li>
+  <li>2 controllers: $30 ($15 each)</li>
+  <li>16 GB SD card: $8</li>
+</ol>
+
+<p>Compared to a similar console that is <a href="https://www.walmart.com/ip/800-Games-in-1-Pandora-s-Box-4s-Multiplayer-Home-Arcade-Console-Double-Joystick-Kit/166621177?wmlspartner=wlpa&amp;selectedSellerId=10610&amp;adid=22222222227102190842&amp;wmlspartner=wmtlabs&amp;wl0=&amp;wl1=g&amp;wl2=c&amp;wl3=218293539805&amp;wl4=pla-354654641996&amp;wl5=9016944&amp;wl6=&amp;wl7=&amp;wl8=&amp;wl9=pla&amp;wl10=117027497&amp;wl11=online&amp;wl12=166621177&amp;wl13=&amp;veh=sem" target="_blank">$180.55 at walmart</a>, I’d say it is a good deal :)</p>
+
+<p>I think the the only thing I changed, was that I made it so that the Joy Stick acted as the D-Pad. I did this because some games, like Ms. Pac Man, is a bit hard to play with the D-Pad. To do this, just go to the config screen and select <code class="highlighter-rouge">RetroArch configuration</code>, then select <code class="highlighter-rouge">settings -&gt; Input -&gt; Input User Binds 1</code> then look for the option that says <code class="highlighter-rouge">Analog D-pad mode</code> user the D-Pad to select whether you want the left or right analog stick to be mimick the D-Pad. Then go back to the initial screen, then go to configuration and make sure you save this change. Then go back to RetroPie and you’ll be able to use your analog stick as a D-pad making arcade games much easier!</p>
+
+<h2 id="going-forward">Going forward</h2>
+
+<p>Going forward, I think I’m slowly going to build out an Arcade Cabinet. I say slowly because, A) I don’t have the tools to build it (but my girlfriend’s father does), and B) my girlfriend isn’t that thrilled about having an Arcade cabinet in our apartment.</p>
+
+<p>This weekend, I am going to build a control panel to mimic an Arcade Cabinet’s controls for two players. I’ll write a blog post on that next week. After that, I am going to try to salvage a screen somewhere that mimics an arcade screen but not a real one because those are expensive.</p>
+
+<p>If you have any questions, or have any feedback, drop a comment below or shout me an email. Thanks!</p>
+
+    </div>
+    
+    <div class="post_wrapper">
+      <footer class="post_footer cf">
+        <div class="post_share">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=Building A Raspberry Pi Arcade Machine&url=/building-a-raspberry-pi-arcade-machine/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://facebook.com/sharer.php?u=/building-a-raspberry-pi-arcade-machine/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://plus.google.com/share?url=/building-a-raspberry-pi-arcade-machine/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+        </div>
+        <div class="post_tag">
+          <span>Tags:</span>
+          
+          <a href="/tags#raspberry pi" class="tag">raspberry pi</a>
+          
+          <a href="/tags#mame" class="tag">mame</a>
+          
+          <a href="/tags#retro" class="tag">retro</a>
+          
+          <a href="/tags#arcade" class="tag">arcade</a>
+          
+          <a href="/tags#games" class="tag">games</a>
+          
+          <a href="/tags#RetroPie" class="tag">RetroPie</a>
+          
+        </div>
+      </footer>
+    </div>
+  </article> <!-- End Section Post -->
+
+  <section class="author cf">
+    <div class="post_wrapper">
+      <div class="author_image">
+        <img src="/assets/img/face.jpg" alt="Author face">
+      </div>
+      <div class="author_info">
+        <h2 class="author_title">Yoseph Radding</h2>
+        <p class="author_subtitle"><p>Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
+</p>
+        <div class="author_social">
+          
+          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
+          
+          
+          
+
+          
+          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="http://yoseph.tech" target="_blank">http://yoseph.tech</a></span>
+          
+          
+            <span>
+              <a href="https://twitter.com/raddingy" target="_blank">
+                <i class="fa fa-twitter" aria-hidden="true"></i> @raddingy
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    </div>
+  </section> <!-- End Section Author -->
+
+  <section class="recent_box">
+    <div class="post_wrapper">
+      <h2 class="recent_title">Recent posts</h2>
+      <div class="recent_list">
+        
+          
+            <a href="/building-a-raspberry-pi-arcade-machine/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building A Raspberry Pi Arcade Machine</span></a>
+          
+        
+          
+            <a href="/relaunching-my-blog/" class="recent_item" style="background-image: url( /assets/img/detroit.jpg )"><span>Relaunching My Blog</span></a>
+          
+        
+          
+            <a href="/experiences-with-dotnet-core/" class="recent_item" style="background-image: url( /assets/img/net-core-logo.jpg )"><span>Experiences with .NET Core</span></a>
+          
+        
+      </div>
+    </div>
+  </section> <!-- End Section Recent Box -->
+  
+  
+<section class="comment_area">
+  <div class="comment_wrapper">
+    
+    <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://yoseph-tech.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                            
+    
+  </div>
+</section> <!-- End Section Comment Area -->
+  
+</main> <!-- End Section Post Content -->
+
+
+<footer class="main_footer">
+  <div class="wrapper">
+    
+<ul class="social_footer">
+  
+  
+    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+  
+  
+  
+    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
+  
+  
+  
+  
+    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+  
+</ul>
+    <div class="copyright">
+      <p>&copy; 2017 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
+      <p><em>All opinions expressed are my own</em></p>
+    </div>
+  </div>
+</footer> <!-- End Section Footer -->
+
+
+  
+<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
+  
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/jquery.vide.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+<!-- End Javascript -->
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-83670049-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-83670049-2');
+</script>
+
+</body>
+</html>
