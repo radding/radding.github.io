@@ -1,1 +1,1 @@
-Sitemap: /sitemap.xml
+Sitemap: http://yoseph.tech/sitemap.xml
