@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Building An Arcade Controller - Yoseph.TECH | All things Tech</title>
+	<meta name="description" content="Last week, we built a retro-arcade console out of a Raspberry Pi. This week I am going to walk you through building a retro arcade controller to play your games!">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!-- OG tags -->
+	<meta property="og:image" content="/assets/img/rpi_arcade1.png"/>
+	<meta property="og:title" content="Building An Arcade Controller - Yoseph.TECH | All things Tech" />
+	<meta property='og:description' content='Last week, we built a retro-arcade console out of a Raspberry Pi. This week I am going to walk you through building a retro arcade controller to play your games!'/>
+	<meta property="og:type" content="article" />
+	<meta property='og:url' content='/building-an-arcade-controller/' />
+
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#d25469">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#d25469">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  
+<header class="main_header">
+  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
+  <nav class="main_menu">
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+</header> <!-- End Section Header -->
+
+<main class="post_content">
+  <article class="post">
+    <header>
+      <div class="post_image">
+        <img src=/assets/img/rpi_arcade1.png alt="Building An Arcade Controller">
+      </div>
+      <div class="post_description">
+        <p class="post_meta">2017, Oct 13</p>
+        <h1 class="post_title">Building An Arcade Controller</h1>
+      </div>
+    </header> <!-- End Header -->
+
+    <div class="entry_content">
+      <p>Last week I wrote an <a href="/building-a-raspberry-pi-arcade-machine/" target="_blank">article on making a Retro Game Console</a>. Wanting to take <span style="text-decoration:underline">Yoseph’s Arcade™</span> to the next level, this week I built a arcade controller.</p>
+
+<p>This was a medium level project requiring a knowledge of power tools.</p>
+
+<p>When all’s said and done, you should come away with a board that looks like this:</p>
+<figure>
+  <img src="/assets/img/Aracade_panel_front.jpg" alt="*The front of the arcade panel*" class="" />
+  <figcaption><p><em>The front of the arcade panel</em></p>
+</figcaption>
+</figure>
+
+<p>Without further ado, Let’s  get started.</p>
+
+<h2 id="trip-to-home-depot-and-an-amazon-order">Trip to Home Depot (and an Amazon order)!</h2>
+
+<p>We need to gather some supplies from Home Depot and of course we need some arcade buttons and joysticks. I was thinking of adding a trackball, but I decided against it because I felt it would make the board to busy.</p>
+
+<h3 id="arcade-buttons">Arcade Buttons</h3>
+<p>For the arcade buttons, I went with <a href="https://www.amazon.com/gp/product/B00WAY9848/ref=oh_aui_detailpage_o00_s00?ie=UTF8&amp;psc=1" target="_blank">these buttons from Amazon</a>. I’m sure any arcade button set on Amazon would work, but I chose this one in particular because a) it lights up, and b) it has a relatively high rating with plenty of reviews. This set also comes with two USB encoders and two different colored buttons and joysticks, so you can play with two people. I also bought <a href="https://www.amazon.com/Easyget-Illuminated-Button-Buttons-Fighting/dp/B01N5Y8E2Z/ref=pd_lutyp_cxhsh_1_3?_encoding=UTF8&amp;pd_rd_i=B01N5Y8E2Z&amp;pd_rd_r=7TF09SJY18KTQ5E9J3Q3&amp;pd_rd_w=nLpDs&amp;pd_rd_wg=HwwGP&amp;psc=1&amp;refRID=7TF09SJY18KTQ5E9J3Q3" target="_blank">these other buttons</a> for no other reason except it says coin and has player icons. I actually did not use these buttons in this project, though I may add them later.</p>
+
+<h3 id="drill-bit-sizes">Drill bit sizes</h3>
+<p>Arcade buttons come primarily in two sizes: 30mm and 24mm, and both of these kits use that size. In the USA, where I live, it is extremely difficult to find those exact size drill bits to use to cut the holes out. The next best thing is to get drill bits that approximate the proper sizes. For the 30mm holes, I used a 1 1/8’’ hole saw, and for the 24mm, I used a 15/16’’ spade tip drill bit. The 1 1/8 inch drill bit was the perfect size even though the box said that it cuts a 29mm hole. The 15/16 drill bit was good too, but it was a little small. I tried a one inch spade tip (on a test board) and that was a little too big for the 24mm buttons. I honestly felt as though I could accidently punch the buttons through the hole. So instead of sticking with the one inch holes, I used the 15/16 spade tip and I used some sandpaper to make the buttons fit. After a light sanding (I went around the hole maybe 4-6 times), the 24mm buttons fit, though they are snugger than the 30mm holes.</p>
+
+<p>If you can find a 23 or 24 mm spade tip, hole saw, forstner, or other bit to drill clean holes, definitely use those. If you can’t find those, you can use the 15/16 inch bit and just sand a bit.</p>
+
+<h3 id="wood">Wood</h3>
+<p>This is an important piece of the of the board. It is what is holding your buttons after all!</p>
+
+<p>For this, I used <a href="http://www.homedepot.com/p/1-2-in-x-2-ft-x-4ft-Medium-Density-Fiberboard-1508108/202089097" target="_blank">this Medium Density Fiberboard</a> from the home depot for $11. The 4ft X 8ft board is $15 so if you want that, you can go for it, but I have <em>plenty</em> of wood left over from the 2ft X 4ft board.</p>
+
+<p>I picked 1/2 inch MDF board because it wasn’t as flimsy as the 1/4 inch board; I couldn’t just take thee wood and flex it. I thought it felt more sturdy. I also picked fiberboard because it is easier to paint and when you cut or drill, it leaves cleaner edges than plywood. You should also be careful when cutting or drilling this wood as it contains some pretty nasty chemicals. Definitely cut this outside, with a saw that has a vacuum attached, or use one of those dust masks.</p>
+
+<figure>
+  <img src="https://www.envirosafetyproducts.com/media/catalog/product/3/0/3070-3MM8210Plus.jpg" alt="*A Dust Mask*" class="" />
+  <figcaption><p><em>A Dust Mask</em></p>
+</figcaption>
+</figure>
+
+<h3 id="some-miscellaneous-items">Some Miscellaneous items</h3>
+<p>In order to mount my joysticks, I grabbed a eight of countersunk M8 X 25mm Machine screws with 8 M8 nylon lock bolts. I only grabbed the Lock bolts because those were the first bolts I saw that would work. I also grabbed some finishing nails (the nails with the smaller heads) and small screws to mount the the USB encoders.</p>
+
+<h2 id="lets-actually-start-building">Let’s Actually Start Building</h2>
+<p>I drew my insperation from the <a href="https://shop.xgaming.com/collections/arcade-joysticks" target="_blank">X-Arcade Dual Joystick</a></p>
+
+<figure>
+  <img src="//cdn.shopify.com/s/files/1/0192/2714/products/dual-stick_large.png?v=1449591754" alt="*The X-Arcade Dual Joystick*" class="" />
+  <figcaption><p><em>The X-Arcade Dual Joystick</em></p>
+</figcaption>
+</figure>
+
+<h3 id="first-cutting-the-wood">First cutting the wood.</h3>
+<p>I found <a href="https://support.xgaming.com/support/solutions/articles/12000003145-what-are-the-dimensions-of-your-products-" target="_blank">this great forum post</a> outlining their dimensions and decided to base my project off of that. I didn’t do the fancy cuts and angles because I don’t have easy access to a saw. So here is what I came up with:</p>
+<ol>
+  <li>For the top piece (the piece with all the buttons), I made it 24 inches by 11 inches.</li>
+  <li>for the two short sides, I made them 4 inches by 8inches.</li>
+  <li>for the long sides, I made them 24 inches by 4 inches</li>
+  <li>I wasn’t able to cut a bottom piece (due to lack of a saw), but the bottom piece would have been 24 inches by 9 inches.</li>
+</ol>
+
+<figure>
+  <img src="/assets/img/wood_for_arcade.jpg" alt="*The cut wood, with Barney sitting idly by.*" class="" />
+  <figcaption><p><em>The cut wood, with Barney sitting idly by.</em></p>
+</figcaption>
+</figure>
+
+<h3 id="next-step-drilling-the-holes">Next step, Drilling the holes</h3>
+<p>I wanted to get the feeling of an actual arcade machine. I figure the best way to do that was to make the board as symmetric as possible. First I made sure to draw lines right down the middle of the board, both lengthwise and widthwise. The width long line would be a starting position for player two’s controller, just like the edge is the starting position for player one’s controller. Then I put the line for the controller 4 inches from their respective edges (player two’s edge is the center line). After that, I measured 2 and a half inches from the joysticks, for where the buttons will begin. Next I spaced the buttons out at 4 cm each. Why the sudden change to metric? If you remember, the buttons are in metric so it was easier for me to do math when the button measurements are in metric. So I drew three new lines spaced 4 cm apart. But I have 8 big buttons! So I made two rows of 3 and one row of two.</p>
+
+<p>The reason I did to rows of three is because I love Street fighter and the arcade game has two rows of three.</p>
+<figure>
+  <img src="https://r.mprd.se/MAME/cpanel/sf2.png" alt="*Street fighter controller*" class="" />
+  <figcaption><p><em>Street fighter controller</em></p>
+</figcaption>
+</figure>
+
+<p>Next I made two lines, one above the lengthwise middle line and one below, both two centimeters from the middle line. Next, I made a line two centimeters from the bottom row and 4 centimeters from the middle button. When you are done with that step, you should have 10 places where lines intersect. 7 of those lines are where holes for the buttons and joystick will go. In the below picture, I circled where the buttons will go, and the joy stick goes where the lines intersect closest the edge.</p>
+<figure>
+  <img src="/assets/img/wood_for_arcade_measured_with_one_hole.jpg" alt="*The final measured board with all the lines. I already cut a single hole here and forgot the bottom row of two.*" class="" />
+  <figcaption><p><em>The final measured board with all the lines. I already cut a single hole here and forgot the bottom row of two.</em></p>
+</figcaption>
+</figure>
+
+<p>All of these holes need to be 1 1/8 inch, even the one for the joystick.</p>
+
+<p>Next I drilled two holes in the base, both 1 and 1/8 inch. One hole is for side that will face your tv. This is where the cables for USB will run. I put this one smackdab in the middle of one of the 24 by 4 inch boards (centered at 12 inches and 2 inches). The other hole is for a button that will basically act as a select button for one of the players. I put this hole on one of the small 8 inch by 4 inch boards, so that it will be on the side. This button was put 4 inches from the back and two inches from the top. I did this so that it would be closer to the USB encoder.</p>
+
+<p>The last set of holes I made were the three small 15/16 buttons at the top. I put one in the middle (12 inches from the edge), and 4cm from the other edge. I then put the other two holes 6 inches from this button (still 4cm from the edge).</p>
+
+<h3 id="putting-the-buttons-and-joystick">Putting the buttons and Joystick.</h3>
+
+<p>After all of the button holes are drilled, you put in the buttons. The buttons I linked to above have plastic bolt like screws that you use to attach them. Slip the buttons in and then tighten the screws on. It should be pretty easy to do this.</p>
+
+<p>When that is done, it’s time for the Joystick. Make sure you measure the base plate of the joystick well. You need to drill four small holes for the bolts in order to mount the joystick.</p>
+
+<figure>
+  <img src="/assets/img/joystick_top_view.jpg" alt="*The baseplate of the joystick*" class="" />
+  <figcaption><p><em>The baseplate of the joystick</em></p>
+</figcaption>
+</figure>
+
+<p>After that is all done, you should have something that looks like this:</p>
+<figure>
+  <img src="/assets/img/arcade_panel_back.jpg" alt="*The back of the arcade panel*" class="" />
+  <figcaption><p><em>The back of the arcade panel</em></p>
+</figcaption>
+</figure>
+
+<figure>
+  <img src="/assets/img/Aracade_panel_front.jpg" alt="*The front of the arcade panel*" class="" />
+  <figcaption><p><em>The front of the arcade panel</em></p>
+</figcaption>
+</figure>
+
+<h3 id="making-the-base">Making the base</h3>
+<p>Next up is a really simple part, making the base. Honestly all I did here was use some wood glue and hammer in some finishing nails. When you are done, you will have this:</p>
+<figure>
+  <img src="/assets/img/bottom_panel.jpg" alt="*The bottom Base, before I cut the holes*" class="" />
+  <figcaption><p><em>The bottom Base, before I cut the holes</em></p>
+</figcaption>
+</figure>
+
+<p>You’ll notice that my base doesn’t have the two holes. I took this picture before I drilled them. I don’t recommend doing that :)</p>
+
+<h2 id="saddle-up-the-wiring">Saddle Up: the wiring</h2>
+<p>We are close to the finish line now! All we really need to do is wire it up. Wiring is really easy, especially because the buttons come with wire harnesses and instructions. First I put the wire on the buttons. It’s kind of hard to describe what wire goes where so here is a picture:</p>
+<figure>
+  <img src="https://www.thegeekpub.com/wp-content/uploads/2016/07/Arcade-Control-Kit-2-Player-LED-Red-Blue-Sanwa-0009.jpg" alt="*Where the wires go*" class="" />
+  <figcaption><p><em>Where the wires go</em></p>
+</figcaption>
+</figure>
+
+<p>After all the buttons have wires, I would connect the USB encoder. You don’t have to worry where you put the buttons, because retro pie will ask you to map the inputs when you plug it in for the first time.</p>
+
+<figure>
+  <img src="/assets/img/arcade_wired.jpg" alt="*All wires added*" class="" />
+  <figcaption><p><em>All wires added</em></p>
+</figcaption>
+</figure>
+
+<p>As a side note: I put the middle top button on player two’s encoder and the side button on player one’s encoder.</p>
+
+<h2 id="one-last-step">One last step!</h2>
+<p>Finally there is one last thing and that is attaching the arcade panel to the base. you can do this before or after wiring to be honest. All you really have to do is set the top board on top of the base and nail it down. I wouldn’t use screws as MDF splits easily and doesn’t hold screws really well.</p>
+
+<h2 id="and-thats-that">And that’s that!</h2>
+<p>You now have a working arcade controller that you can use to play whatever you want. You may want to add some things, like JoyStick extenders (I did) or a paint job. But you can really do whatever you want. This is an easy project so feel free to experiment!</p>
+
+<h2 id="extra-photos">Extra photos</h2>
+<figure>
+  <img src="/assets/img/playing_mspacman.jpg" alt="*Me playing Ms. Pacman*" class="" />
+  <figcaption><p><em>Me playing Ms. Pacman</em></p>
+</figcaption>
+</figure>
+<figure>
+  <img src="/assets/img/boardLitup.jpg" alt="*Board being lit up*" class="" />
+  <figcaption><p><em>Board being lit up</em></p>
+</figcaption>
+</figure>
+<figure>
+  <img src="/assets/img/full_arcade.jpg" alt="*Edgy shot of the controller*" class="" />
+  <figcaption><p><em>Edgy shot of the controller</em></p>
+</figcaption>
+</figure>
+
+<p>As always, if you have any questions or comments, let me know either through email, or in the comments below. Next week I am giving a talk at MSU’s Spartan hackers about building production code. Next week’s blog post will probably be about that!</p>
+
+    </div>
+    
+    <div class="post_wrapper">
+      <footer class="post_footer cf">
+        <div class="post_share">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=Building An Arcade Controller&url=http://yoseph.tech/building-an-arcade-controller/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://facebook.com/sharer.php?u=http://yoseph.tech/building-an-arcade-controller/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://plus.google.com/share?url=http://yoseph.tech/building-an-arcade-controller/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+        </div>
+        <div class="post_tag">
+          <span>Tags:</span>
+          
+          <a href="/tags#RetroPie" class="tag">RetroPie</a>
+          
+          <a href="/tags#DIY" class="tag">DIY</a>
+          
+          <a href="/tags#Retro" class="tag">Retro</a>
+          
+          <a href="/tags#Gaming" class="tag">Gaming</a>
+          
+          <a href="/tags#raspberry" class="tag">raspberry</a>
+          
+          <a href="/tags#pi" class="tag">pi</a>
+          
+          <a href="/tags#mame" class="tag">mame</a>
+          
+          <a href="/tags#retro" class="tag">retro</a>
+          
+          <a href="/tags#arcade," class="tag">arcade,</a>
+          
+          <a href="/tags#games" class="tag">games</a>
+          
+        </div>
+      </footer>
+    </div>
+  </article> <!-- End Section Post -->
+
+  <section class="author cf">
+    <div class="post_wrapper">
+      <div class="author_image">
+        <img src="/assets/img/face.jpg" alt="Author face">
+      </div>
+      <div class="author_info">
+        <h2 class="author_title">Yoseph Radding</h2>
+        <p class="author_subtitle"><p>Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
+</p>
+        <div class="author_social">
+          
+          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
+          
+          
+          
+
+          
+          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="http://yoseph.tech" target="_blank">http://yoseph.tech</a></span>
+          
+          
+            <span>
+              <a href="https://twitter.com/raddingy" target="_blank">
+                <i class="fa fa-twitter" aria-hidden="true"></i> @raddingy
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    </div>
+  </section> <!-- End Section Author -->
+
+  <section class="recent_box">
+    <div class="post_wrapper">
+      <h2 class="recent_title">Recent posts</h2>
+      <div class="recent_list">
+        
+          
+            <a href="/building-an-arcade-controller/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building An Arcade Controller</span></a>
+          
+        
+          
+            <a href="/building-a-raspberry-pi-arcade-machine/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building A Raspberry Pi Arcade Machine</span></a>
+          
+        
+          
+            <a href="/relaunching-my-blog/" class="recent_item" style="background-image: url( /assets/img/detroit.jpg )"><span>Relaunching My Blog</span></a>
+          
+        
+          
+            <a href="/experiences-with-dotnet-core/" class="recent_item" style="background-image: url( /assets/img/net-core-logo.jpg )"><span>Experiences with .NET Core</span></a>
+          
+        
+      </div>
+    </div>
+  </section> <!-- End Section Recent Box -->
+  
+  
+<section class="comment_area">
+  <div class="comment_wrapper">
+    
+    <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://yoseph-tech.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                            
+    
+  </div>
+</section> <!-- End Section Comment Area -->
+  
+</main> <!-- End Section Post Content -->
+
+
+<footer class="main_footer">
+  <div class="wrapper">
+    
+<ul class="social_footer">
+  
+  
+    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+  
+  
+  
+    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
+  
+  
+  
+  
+    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+  
+</ul>
+    <div class="copyright">
+      <p>&copy; 2017 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
+      <p><em>All opinions expressed are my own</em></p>
+    </div>
+  </div>
+</footer> <!-- End Section Footer -->
+
+
+  
+<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
+  
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/jquery.vide.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+<script id="dsq-count-scr" src="//yoseph-tech.disqus.com/count.js" async></script>
+<!-- End Javascript -->
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-83670049-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-83670049-2');
+</script>
+
+</body>
+</html>
