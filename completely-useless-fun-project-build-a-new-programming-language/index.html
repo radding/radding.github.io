@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Completely Useless Fun Project: Build A New Programming Language - Yoseph.TECH | All things Tech</title>
+	<meta name="description" content="This week, I am doing something new. Something most people will shy away from. But not me! Why? Because I am a masochist. So what am I doing? I am going to start creating a completely new language.">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!-- OG tags -->
+	<meta property="og:image" content="/assets/img/programming-languages.jpg"/>
+	<meta property="og:title" content="Completely Useless Fun Project: Build A New Programming Language - Yoseph.TECH | All things Tech" />
+	<meta property='og:description' content='This week, I am doing something new. Something most people will shy away from. But not me! Why? Because I am a masochist. So what am I doing? I am going to start creating a completely new language.'/>
+	<meta property="og:type" content="article" />
+	<meta property='og:url' content='/completely-useless-fun-project-build-a-new-programming-language/' />
+
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#d25469">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#d25469">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  
+<header class="main_header">
+  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
+  <nav class="main_menu">
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+</header> <!-- End Section Header -->
+
+<main class="post_content">
+  <article class="post">
+    <header>
+      <div class="post_image">
+        <img src=/assets/img/programming-languages.jpg alt="Completely Useless Fun Project: Build A New Programming Language">
+      </div>
+      <div class="post_description">
+        <p class="post_meta">2017, Nov 03</p>
+        <h1 class="post_title">Completely Useless Fun Project: Build A New Programming Language</h1>
+      </div>
+    </header> <!-- End Header -->
+
+    <div class="entry_content">
+      <p>Writing a new language is often seen as magical. New languages and tools pop up from time to time seemingly from the ether. But this isn’t the case, languages have to come from somewhere. <a href="https://softwareengineering.stackexchange.com/a/84361" target="_blank">Here is Eric Lippert</a>, a former principle developer on the C# compiler, talking about the response he gets when he tells people he designs languages.</p>
+
+<p>Because of this mystique around languages and their tooling, most people think building a programming language as difficult. But it doesn’t have to be this way.</p>
+
+<p>And to prove it, I’m going to write a series that chronicles me developing this language which I will call <strong>Arbor</strong>.</p>
+
+<h2 id="inspiration-for-arbor">Inspiration for Arbor</h2>
+<p>The primary motivation for me to build Arbor was Web Assembly. I am fascinated with Web Assembly and primarily wanted a way to play with it. So I decided to make a programming language months ago that specifically targets Web Assembly.</p>
+
+<figure>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/WebAssembly_Logo.png" alt="*Web assembly logo*" class="" />
+  <figcaption><p><em>Web assembly logo</em></p>
+</figcaption>
+</figure>
+
+<p>For those who  don’t know, <a href="https://en.wikipedia.org/wiki/WebAssembly" target="_blank">Web Assembly or wasm</a> is a specification that is still in its infancy. It aims to be, well, the assembly code for the web. It promises nearly native speeds for web app front ends. The code for Wasm is a kind of stripped down javascript, making it faster to parse and hopefully faster to execute. In fact, the original demo for web assembly was the unity demo game, Angry Bots that ran in Firefox and Chrome back in 2015. The game isn’t like Crysis, but it is still impressive how well it ran. While I can’t find that demo, here is a new demo on <a href="http://webassembly.org/demo/" target="_blank">webassembly.org</a></p>
+
+<p>The primary point of Wasm was to enable C++ to be compiled for the web and have really big compute intensive processes running inside your browser. Today, Wasm really only supports C/C++ and Rust. Soon though, we will add Arbor to that list ;)</p>
+
+<p>However, as I said, web assembly is in its infancy. According to <a href="https://caniuse.com/#search=webassembly" target="_blank">caniuse.com</a>, only 65.34% of all browsers support wasm ass of today, November 3rd, 2017 and Safari just got support back in September. But this isn’t really a problem because webassembly can fall back to <a href="http://asmjs.org/" target="_blank">asm.js</a> if need be. And either way, it seems the support for Wasm is growing, so that 65% number will only get larger.</p>
+
+<p>Anyway, aside from wanting to use Wasm, I didn’t really have any other requirements. I knew I wanted it to be easy to use and read (who wants a language that is difficult to look at. I’m looking at you perl!)</p>
+
+<figure>
+  <img src="http://www.zoitz.com/comics/perl_small.png" alt="*Seriously though, I used Perl once and my eyes bled for weeks afterwards*" class="" />
+  <figcaption><p><em>Seriously though, I used Perl once and my eyes bled for weeks afterwards</em></p>
+</figcaption>
+</figure>
+
+<p>But then this week I had an idea. Why not make it a pure functional language? Functional languages are all the rage right now and they have some really cool concepts that I would like to implement, like no side effects or guaranteed no crashing (I’ll admit, the second one is a bit ambitious). The only problem is I looked around and functional languages have particularly alien syntax. Coming from C like languages, most functional language’s syntax was a little hard to read.</p>
+
+<figure>
+  <img src="https://i.stack.imgur.com/U83Iz.png" alt="*Haskell code. It looks foreign and weird to someone who is familiar with  C like languages*" class="" />
+  <figcaption><p><em>Haskell Code. It looks foreign and weird to someone who is familiar with  C like languages</em></p>
+</figcaption>
+</figure>
+
+<p>But then I saw <a href="http://elm-lang.org/" target="_blank">Elm</a>. While not particularly beautiful to read, it wasn’t actually that bad. So elm became my starting point. But even then, I wanted a language that someone without any Arbor experience can jump into and pick up without much difficulty. So I decided to take some things from Python, JavaScript and C/C++.</p>
+
+<h2 id="design-of-arbor-first-iteration">Design of Arbor (First Iteration)</h2>
+
+<h3 id="typing-and-assignment">Typing and Assignment</h3>
+<p>The first thing I wanted was Python like Typing; basically dynamically, but strongly typed. This means an expression like this: <code class="highlighter-rouge">'x' + 1</code> is invalid and will throw an error, but these two statements are valid: <code class="highlighter-rouge">x = 1; x = 'dd';</code>. However, to maintain safety, I will also like optional parameter type checking. If you define a functions like so: <code class="highlighter-rouge">(a:int, b:string)</code> then you would expect a to always be an int and string to always be a string.</p>
+
+<p>The second thing I decided on was that everything must be assigned. In order to make the language simpler to implement, I did away with any special keywords to define a function. Unlike in Python, JavaScript, or C/C++ a function is inherently anonymous, unless assigned to a variable. The way to define a function would be: <code class="highlighter-rouge">() -&gt; &lt;function body&gt;</code>. In order to keep that function around you would need to do something like: <code class="highlighter-rouge">foo = () -&gt; &lt;function body&gt;</code>. Of course, this runs the risk of a programmer accidentally overwriting their function.</p>
+
+<p>To make the language “safer”, I decided that every variable had to be declared before you use it. This prevents a programmer,especially one with atrocious spelling like me, from accidentally declaring a variable because of a spelling error in one place. For right now, the only two keywords to define a variable is <code class="highlighter-rouge">let</code> and <code class="highlighter-rouge">const</code>. I decided on <code class="highlighter-rouge">const</code> because it is pretty self explanatory that the variable is constant. Plus C/C++ and Javascript use the <code class="highlighter-rouge">const</code> keyword, so I think it would be pretty easy for most developers to pick it up.</p>
+
+<p>The choice of <code class="highlighter-rouge">let</code> has really nothing to do  with javascript, all though maybe it does a bit. I choose the keyword <code class="highlighter-rouge">let</code> to more closely align with “math speak” (i.e <code class="highlighter-rouge">let x be a value in universe</code>). I also chose let because it corresponds to a <a href="https://en.wikipedia.org/wiki/Let_expression#Definition" target="_blank">lambda abstraction</a> and <a href="https://en.wikipedia.org/wiki/Lambda_calculus" target="_blank">lambda calculus</a> is really the foundation of all pure functional languages.</p>
+
+<p>I’m still torn about providing type declarations, such as <code class="highlighter-rouge">int</code>, <code class="highlighter-rouge">float</code>, <code class="highlighter-rouge">char</code>, and <code class="highlighter-rouge">array</code> because I don’t see them as completely necessary. It may be nice to have if for no other reason than it makes the language easier to read. At the same time however, since the type can be inferred from what you are assigning a variable to, and function definitions provide optional type checking, I don’t know if this is absolutely necessary. I am leaning towards no, but If I do add support for type declarations, it will be with the <code class="highlighter-rouge">let</code> keyword, not instead of.</p>
+
+<h3 id="functions-definitions">Functions Definitions</h3>
+<p>I also liked the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank">JavaScript arrow function</a> syntax (this is part of the reason why arbor has <code class="highlighter-rouge">-&gt;</code> to define functions), and especially the behaviour where a single line means return and a function body means do this whole function body. But at the same time I like Python’s no curly brace syntax. So what I did was do something that a lot of other languages do: I defined an end statement. So in Arbor, you would define a function two ways:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>let foo = (a, b, c) -&gt; a + b + c;
+</code></pre>
+</div>
+
+<p>or</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>let foo = (a, b, c) -&gt; 
+    return a + b + c;
+done;
+</code></pre>
+</div>
+
+<p>Another thing I like about python is the way you can implement default parameters. In arbor it will be done similarly:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>(a = 1, b = 2) -&gt; a + b;
+</code></pre>
+</div>
+
+<p>One thing that a lot of people complain about in Python, and this also trips up people coming from languages such as Java or C/C++, is that you can pass in any type into a function. This could cause issue where you expect a string, but instead receive an int, causing your application to crash. All though this is something you’re unit tests should catch, I also wanted to “fix” this with compile time type checking. Plus I think this makes the language that much more descriptive in my mind. If you want type checking and defaults, I think it should look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>(a:int, b:int = 2) -&gt; a + b;
+</code></pre>
+</div>
+
+<p>Taking another principle from Python is packing and unpacking of variables in functions. Similarly to <code class="highlighter-rouge">function(...args)</code> in es6, python allows you to define lift over params as such: <code class="highlighter-rouge">def foo(a, *args)</code>. Arbor will do something similar: <code class="highlighter-rouge">foo = (a, b, *args) -&gt; ...</code>. Then you can call this function like so: <code class="highlighter-rouge">foo(1, 2, 3, 4, 5, 6)</code>.
+And like Python, I also want Arbor to support named leftover variables: <code class="highlighter-rouge">def foo(a, b, **kwargs)</code>, in arbor would be: <code class="highlighter-rouge">foo = (a, b **kwargs) -&gt; ...</code>. Where <code class="highlighter-rouge">kwargs</code> is a dictionary.</p>
+
+<p>And finally variable unpacking. Python has this really neat concept called unpacking if you have a function definition like</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def foo(a, b, c, d, e, f, g):
+    pass
+</code></pre>
+</div>
+
+<p>you can call that function like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>arr = [1, 2, 3, 4, 5, 6, 7]
+foo(*arr)
+
+# or
+
+vals = {
+    "a": 1,
+    "b": 2,
+    "c": 3,
+    "d": 4,
+    "e", 5,
+    "f": 6,
+    "g": 7 
+}
+foo(**arr)
+</code></pre>
+</div>
+
+<p>With default parameters, any parameter not in the dict or array will be the default. I want Arbor to support this exactly the same way:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>foo = (a, b, c, d, e, f, g) -&gt; null;
+arr  = [1, 2, 3, 4, 5, 6, 7];
+foo(*arr)
+
+// and
+
+dict = {
+    a: 1,
+    b: 2,
+    c: 3,
+    d: 4,
+    e: 5,
+    f: 6, 
+    g: 6,
+}
+foo(**dict)
+</code></pre>
+</div>
+
+<h3 id="control-and-flow">Control and flow</h3>
+<p>In true functional programming fasion, I decided to do away with loops. Instead all loops should be implemented using recursion constructs. Additionally, built in functions such as <code class="highlighter-rouge">forEach</code>, <code class="highlighter-rouge">map</code>, <code class="highlighter-rouge">filter</code>, <code class="highlighter-rouge">fold</code> or <code class="highlighter-rouge">reduce</code> will be implemented in order to make implementing loop behaviour easier.</p>
+
+<p>Additionally, as well as having traditional control flow, <code class="highlighter-rouge">if</code>, <code class="highlighter-rouge">else</code>, <code class="highlighter-rouge">else if</code> statements, I will also have haskell like predicates. These could be similar enough to case statements in Elm. These would look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>(a, b) -&gt; 
+    : a &gt; b -&gt; 
+        if (a != b)
+            return "greater than"
+    : a &lt; b -&gt; "less than";
+    : true -&gt; "equal to";
+done;
+</code></pre>
+</div>
+
+<p>This should be functionally equivalent to</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>(a, b) -&gt; 
+    if (a &gt; b): 
+        return "greater than";
+    else if (a &lt; b):
+        return "less than";
+    else: 
+        return "equal to";
+    done;
+done;
+</code></pre>
+</div>
+
+<p>And finally, ternary operators. I really like ternary operators. They are elegant and makes code easier to read for small stuff. However, I think JavaScript’s and C/C++’s ternary operator leaves something to be desired. I really like Python’s ternary operator and that is exactly how ternaries in Arbor should work: <code class="highlighter-rouge">value if &lt;condition&gt; else other value</code>.</p>
+
+<h3 id="data-and-types">Data and Types</h3>
+<p>The only data types I want to include in Arbor are Integers, Floats, chars, Arrays, and Dictionaries. A string keyword will be available, but, like C/C++, it is really just an array of chars. Arbor will also provide <code class="highlighter-rouge">true</code> and <code class="highlighter-rouge">false</code> keywords that is really just 1 and 0 integers. Arbor should have a typedef operator that allows developers to define their own types. This would be similar to how C defines structs:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Person = type {
+    name: string,
+    age: int,
+    favorites: array
+}
+</code></pre>
+</div>
+
+<p>This defines a type so that you can do things like</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>person = instantiate(Person);
+person.name = "yoseph";
+person.age = 22;
+person.favorites = ["programming", "Arbor"]
+</code></pre>
+</div>
+
+<p>or</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>person = instantiate(Person, name="yoseph", age="22", favorites);
+</code></pre>
+</div>
+
+<p>Functions are also first order citizens so that you can pass them as functions or in new types. Types can also refer to themselves, making the type composable and building complex structures like a tree.</p>
+
+<h2 id="tooling-and-the-compiler">Tooling and the compiler</h2>
+
+<p>I haven’t decide much on the tooling for Arbor. I know I will implement some standard function like <code class="highlighter-rouge">instantiate</code> or <code class="highlighter-rouge">new</code> (haven’t decided to be honest), <code class="highlighter-rouge">forEach</code>, <code class="highlighter-rouge">map</code>, <code class="highlighter-rouge">reduce</code>, <code class="highlighter-rouge">filter</code>, and <code class="highlighter-rouge">resize</code>. But these may be just standard library stuff, I’m not sure if they will be built ins.</p>
+
+<p>The one big decision I made in regards to the compiler, and I know I’m going to get shit for this, is that I will implement it in Python initially. This is an experimental language and I only really care about the end result being amazing. I don’t much care for the speed of the compiler. Perhaps in the future I will try to implement it in C/C++ or some other language, but not right now.</p>
+
+<p>The other reason I chose python for my compiler is that it is easy people to set up. Lex and Bison, which every other compiler how to post uses, are frankly a pain to set up, especially for beginners. The lexing and parsing library I use is called <a href="http://www.dabeaz.com/ply/" target="_blank">ply</a> It is a great library that is easy to install (<code class="highlighter-rouge">pip install ply</code>) and easy to use. Take a look at their documentation and see how easy it is to use!</p>
+
+<p>I really want to make building a programming language less scary. For this, I would need to make the compiler as accessible to beginners as possible, and of course Python is an extremely easy to read and easy to pick up language.</p>
+
+<p>Another big decision I made, and I will talk about this a bit next week, is that I am going to use an LLVM web assembly backend for actually compiling down into Wasm. This decision was made because LLVM is an incredibly optimized compiler. By only creating the frontend of the compiler, I only have to worry about optimizing the frontend output code, and letting LLVM handle the final optimizations. Additionally, this will also make Arbor easier to port to a new target, such as x86 or ARM.</p>
+
+<p>The last thing I am going to do is work on the run time. While web assembly is cool, it is still missing some things like the ability to manipulate the DOM. I would have to implement an Arbor to Javascript bridge in order to fully realize the power of Wasm.</p>
+
+<h2 id="the-wrap-up">The wrap up.</h2>
+
+<p>This post really laid out the foundations of what I want Arbor to be. Of course, I don’t expect all of the requirements that I laid out here to stay the same. I’m  sure behaviour and decisions will change. A lot of syntax changes with be implemented as I decide I like some other syntax better. And If anyone has any suggestions, I would love to hear it!</p>
+
+<p>I’m sure it won’t be easy, but I relish the challenge! Next week, I will talk about the parts of the Arbor compiler and maybe get into some actual code behind the compiler! A github repo for all of the code will come shortly.</p>
+
+
+    </div>
+    
+    <div class="post_wrapper">
+      <footer class="post_footer cf">
+        <div class="post_share">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=Completely Useless Fun Project: Build A New Programming Language&url=http://yoseph.tech/completely-useless-fun-project-build-a-new-programming-language/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://facebook.com/sharer.php?u=http://yoseph.tech/completely-useless-fun-project-build-a-new-programming-language/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://plus.google.com/share?url=http://yoseph.tech/completely-useless-fun-project-build-a-new-programming-language/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+        </div>
+        <div class="post_tag">
+          <span>Tags:</span>
+          
+          <a href="/tags#programming" class="tag">programming</a>
+          
+          <a href="/tags#Arbor" class="tag">Arbor</a>
+          
+          <a href="/tags#New Language" class="tag">New Language</a>
+          
+          <a href="/tags#Functional" class="tag">Functional</a>
+          
+          <a href="/tags#web assembly" class="tag">web assembly</a>
+          
+          <a href="/tags#arbor" class="tag">arbor</a>
+          
+          <a href="/tags#completely useless fun project" class="tag">completely useless fun project</a>
+          
+        </div>
+      </footer>
+    </div>
+  </article> <!-- End Section Post -->
+
+  <section class="author cf">
+    <div class="post_wrapper">
+      <div class="author_image">
+        <img src="/assets/img/face.jpg" alt="Author face">
+      </div>
+      <div class="author_info">
+        <h2 class="author_title">Yoseph Radding</h2>
+        <p class="author_subtitle"><p>Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
+</p>
+        <div class="author_social">
+          
+          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
+          
+          
+          
+
+          
+          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="http://yoseph.tech" target="_blank">http://yoseph.tech</a></span>
+          
+          
+            <span>
+              <a href="https://twitter.com/raddingy" target="_blank">
+                <i class="fa fa-twitter" aria-hidden="true"></i> @raddingy
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    </div>
+  </section> <!-- End Section Author -->
+
+  <section class="recent_box">
+    <div class="post_wrapper">
+      <h2 class="recent_title">Recent posts</h2>
+      <div class="recent_list">
+        
+          
+            <a href="/completely-useless-fun-project-build-a-new-programming-language/" class="recent_item" style="background-image: url( /assets/img/programming-languages.jpg )"><span>Completely Useless Fun Project: Build A New Programming Language</span></a>
+          
+        
+          
+            <a href="/building-production-code/" class="recent_item" style="background-image: url( /assets/img/code_screen_shot.jpg )"><span>Building Production Code</span></a>
+          
+        
+          
+            <a href="/building-an-arcade-controller/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building An Arcade Controller</span></a>
+          
+        
+          
+            <a href="/building-a-raspberry-pi-arcade-machine/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building A Raspberry Pi Arcade Machine</span></a>
+          
+        
+          
+            <a href="/relaunching-my-blog/" class="recent_item" style="background-image: url( /assets/img/detroit.jpg )"><span>Relaunching My Blog</span></a>
+          
+        
+          
+            <a href="/experiences-with-dotnet-core/" class="recent_item" style="background-image: url( /assets/img/net-core-logo.jpg )"><span>Experiences with .NET Core</span></a>
+          
+        
+      </div>
+    </div>
+  </section> <!-- End Section Recent Box -->
+  
+  
+<section class="comment_area">
+  <div class="comment_wrapper">
+    
+    <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://yoseph-tech.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                            
+    
+  </div>
+</section> <!-- End Section Comment Area -->
+  
+</main> <!-- End Section Post Content -->
+
+
+<footer class="main_footer">
+  <div class="wrapper">
+    
+<ul class="social_footer">
+  
+  
+    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+  
+  
+  
+    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
+  
+  
+  
+  
+    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+  
+</ul>
+    <div class="copyright">
+      <p>&copy; 2017 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
+      <p><em>All opinions expressed are my own</em></p>
+    </div>
+  </div>
+</footer> <!-- End Section Footer -->
+
+
+  
+<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
+  
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/jquery.vide.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+<script id="dsq-count-scr" src="//yoseph-tech.disqus.com/count.js" async></script>
+<!-- End Javascript -->
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-83670049-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-83670049-2');
+</script>
+
+</body>
+</html>
