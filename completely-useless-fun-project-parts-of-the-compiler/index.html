@@ -95,8 +95,8 @@
 
 <p>In this step, the compiler figures out what the individual statements mean. This step involves your <a href="https://ruslanspivak.com/lsbasi-part7/" target="_blank">abstract syntax tree, otherwise known as an AST</a>. This is the step that understands that when you write <code class="highlighter-rouge">1 + 1</code> that you want to add the two numbers. The parser from the last step builds up your AST so that you could easily traverse this tree and output your IR.</p>
 
-<h2 id="arbors-lexer-and-parser">Arbor’s Lexer and Parser</h2>
-<p>So now that we understand the parts of the compiler a little bit better, let’s discuss putting this into code, specifically the lexer and parser. If you want to check out some of the code written during this post, the GitHub repo can be found here: <a href="https://github.com/radding/Arbor" target="_blank">radding/Arbor</a>. If you want to see the parts specific to this post look at the files <code class="highlighter-rouge">src/lexer/__init__.py</code> and <code class="highlighter-rouge">src/parser/__init__.py</code>for the lexer and parser respectively.</p>
+<h2 id="arbors-lexer">Arbor’s Lexer</h2>
+<p>So now that we understand the parts of the compiler a little bit better, let’s discuss putting this into code, specifically the lexer. If you want to check out some of the code written during this post, the GitHub repo can be found here: <a href="https://github.com/radding/Arbor" target="_blank">radding/Arbor</a>. If you want to see the parts specific to this post look at the file <code class="highlighter-rouge">src/lexer/__init__.py</code>.</p>
 
 <p>The only thing you need to install to start building your own lexers and parsers is <a href="http://www.dabeaz.com/ply/" target="_blank">PLY</a>. Ply is a great library that implements the popular <a href="http://dinosaur.compilertools.net/lex/" target="_blank">lex</a> and <a href="http://dinosaur.compilertools.net/yacc/" target="_blank">yacc</a> tools in Python. Lex is the tool that you use to build out your lexer and Yacc, which stands for Yet Another Compiler Compiler, is what you use to build your parser.</p>
 
