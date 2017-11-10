@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Completely Useless Fun Project: Parts Of The Compiler - Yoseph.TECH | All things Tech</title>
+	<meta name="description" content="This week I am talking about the parts of the compiler, doing a deep dive into the Lexer and Parser and showing how to build the Lexer and Parser in Python. At the end of this post, we should have a working lexer and parser.">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!-- OG tags -->
+	<meta property="og:image" content="/assets/img/compilers.jpg"/>
+	<meta property="og:title" content="Completely Useless Fun Project: Parts Of The Compiler - Yoseph.TECH | All things Tech" />
+	<meta property='og:description' content='This week I am talking about the parts of the compiler, doing a deep dive into the Lexer and Parser and showing how to build the Lexer and Parser in Python. At the end of this post, we should have a working lexer and parser.'/>
+	<meta property="og:type" content="article" />
+	<meta property='og:url' content='/completely-useless-fun-project-parts-of-the-compiler/' />
+
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#d25469">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#d25469">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  
+<header class="main_header">
+  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
+  <nav class="main_menu">
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+</header> <!-- End Section Header -->
+
+<main class="post_content">
+  <article class="post">
+    <header>
+      <div class="post_image">
+        <img src=/assets/img/compilers.jpg alt="Completely Useless Fun Project: Parts Of The Compiler">
+      </div>
+      <div class="post_description">
+        <p class="post_meta">2017, Nov 08</p>
+        <h1 class="post_title">Completely Useless Fun Project: Parts Of The Compiler</h1>
+      </div>
+    </header> <!-- End Header -->
+
+    <div class="entry_content">
+      <p>If you have done C/C++ or Objective-C work on MacOS (There is a project called <a href="http://www.techotopia.com/index.php/Installing_and_Using_GNUstep_and_Objective-C_on_Linux" target="_blank">GNUStep</a> that allows you to run Obj-C on Linux), you may have heard of Clang and LLVM, or maybe Clang/LLVM. It may have confused you because there are two names for a seemingly single piece of software. It may confuse you further to point out that these <em>are</em> two different things, but two pieces to the same puzzle.</p>
+
+<p>What Clang and LLVM are, are the pieces of a compiler. A compiler is really just a single group of processes that takes in some source code and outputs some other code. This output code could be Assembly code, Java ByteCode, hell even <a href="https://en.wikipedia.org/wiki/Source-to-source_compiler" target="_blank">Javascript</a>. Like all good programming problems, compiler construction can be broken down into various parts.</p>
+
+<h2 id="first-a-history">First, a history</h2>
+<p>It may horrify you to know that computer programs weren’t always written in english. For many decades, Programs were written by hand in assembly language. It wasn’t until 1952 that totally <a href="https://en.wikipedia.org/wiki/Grace_Hopper" target="_blank">bad ass Rear Admiral Grace Hopper</a> built the first compiler and coined the term (she also coined the term debugging after pulling a literal moth out of her computer’s circuits).</p>
+
+<p>This first compiler wasn’t much of anything. It really just operated as more of a linker or a loader than what our modern compilers are. The first real modern compiler was introduced in 1957 by John W Backus and his team at IBM for <a href="https://www.obliquity.com/computer/fortran/history.html" target="_blank">Fortran</a>.</p>
+
+<p>And compiler design hasn’t changed all that much since then.</p>
+
+<h2 id="design-of-the-modern-compiler">Design of the modern Compiler</h2>
+<p>The Fortran compiler was built in an era where computers were insanely expensive, huge and slow. In order for Fortran to compete with hand coding assembly, it needed to be <em>fast</em>, at least as fast as hand written code. To do this, the compiler was broken down into two parts: the frontend and the backend (that is what Clang and LLVM are, the frontend and backend respectively). This made it easier to apply transformations and optimizations independently.</p>
+
+<figure>
+  <img src="https://www.tutorialspoint.com/compiler_design/images/compiler_analysis_synthesis.jpg" alt="*The phases of the compiler*" class="" />
+  <figcaption><p><em>The phases of the compiler</em></p>
+</figcaption>
+</figure>
+
+<p>At the highest level, the frontend takes the source code and outputs what is called an <strong>Intermediate Representation</strong> or IR. This may look like assembly code, all though it doesn’t have to, but it isn’t. This code is how compilers internally represent the source code. IRs are used so that that it can be optimized and translated much easier. They also must be designed in such away that the <em>intent</em> of the original source code is preserved and be independent of any source or target language. IRs can be either data structures or textual code based outputs. Then the backend takes the IR and output its targeted language.</p>
+
+<p>There are a few advantages to this design. The first is that this is super easy to optimize. You can optimize your IR independently of your target language and vice versa, creating an insanely fast program. The real power, however, is that you can make your compiler as portable as possible. For example, since your frontend deals with breaking the backend down, you don’t need to re-implement this part of the application. If you want to target Intel’s x86 architecture and ARM architecture with your programming language, all you need to do is replace the backend of the compiler. In fact, this is how GCC and compilers built on LLVM works.</p>
+
+<p>Again, for this compiler, I am building the frontend of the compiler and then going to let LLVM handle the output.</p>
+
+<h3 id="breakdown-of-the-frontend-of-the-compiler">Breakdown of the frontend of the compiler</h3>
+<p>Like all problems in programming, the frontend of the compiler can further be broken down into its own parts.</p>
+
+<figure>
+  <img src="http://pintokarsanda.blog.binusian.org/files/2014/03/front-and-back-end-compilers.png" alt="*Breakdown of the frontend and backend of a compiler*" class="" />
+  <figcaption><p><em>Breakdown of the frontend and backend of a compiler</em></p>
+</figcaption>
+</figure>
+
+<p>The steps the frontend needs to transform your language into its IR are Lexical Analysis, Syntactic Analysis and Semantical Analysis. Lexical analysis, aka lexing is the process of taking a stream of characters and converting it into a stream of <em>tokens</em>. Tokens are really just a pair that describes what certain what a sequence of characters means, and the value of the characters. For example the string <code class="highlighter-rouge">let foo = 1</code> might have the following tokens: (“LET”, “let”), (“NAME”, “foo”), (“EQ”, “=”), and (“NUMBER”, “1”). The result of the lexical analysis then goes into the next phase.</p>
+
+<p>And that next Phase is Syntactical analysis. Syntactic analysis, also known as parsing, is when you take a stream of tokens and find out what they all mean. This is basically how you describe the grammar of your language. This is how languages know that both <code class="highlighter-rouge">(2 * 5) + (6 * 2)</code> and <code class="highlighter-rouge">10 + 12</code> are valid statements. After this Syntactic Analysis is done, the compiler moves on to semantical analysis.</p>
+
+<p>In this step, the compiler figures out what the individual statements mean. This step involves your <a href="https://ruslanspivak.com/lsbasi-part7/" target="_blank">abstract syntax tree, otherwise known as an AST</a>. This is the step that understands that when you write <code class="highlighter-rouge">1 + 1</code> that you want to add the two numbers. The parser from the last step builds up your AST so that you could easily traverse this tree and output your IR.</p>
+
+<h2 id="arbors-lexer-and-parser">Arbor’s Lexer and Parser</h2>
+<p>So now that we understand the parts of the compiler a little bit better, let’s discuss putting this into code, specifically the lexer and parser. If you want to check out some of the code written during this post, the GitHub repo can be found here: <a href="https://github.com/radding/Arbor" target="_blank">radding/Arbor</a>. If you want to see the parts specific to this post look at the files <code class="highlighter-rouge">src/lexer/__init__.py</code> and <code class="highlighter-rouge">src/parser/__init__.py</code>for the lexer and parser respectively.</p>
+
+<p>The only thing you need to install to start building your own lexers and parsers is <a href="http://www.dabeaz.com/ply/" target="_blank">PLY</a>. Ply is a great library that implements the popular <a href="http://dinosaur.compilertools.net/lex/" target="_blank">lex</a> and <a href="http://dinosaur.compilertools.net/yacc/" target="_blank">yacc</a> tools in Python. Lex is the tool that you use to build out your lexer and Yacc, which stands for Yet Another Compiler Compiler, is what you use to build your parser.</p>
+
+<p>To install Ply all you really need to do is run <code class="highlighter-rouge">pip install pip</code>. If you want to run the Arbor code, you can simply clone the GitHub Repo and install the <code class="highlighter-rouge">requirements.txt</code> file by running <code class="highlighter-rouge">pip install -r requirements.txt</code>. After that is all set up, we can move on to actually building some stuff.</p>
+
+<h2 id="the-lexer">The Lexer</h2>
+<p>The first step to building the lexer is thinking about the symbols you need and the patterns they have. Ply uses <a href="https://en.wikipedia.org/wiki/Regular_expression" target="_blank">regular expression</a> in order to match the characters to their proper token types. Some tokens are incredibly simple, a single character for example. Some are a bit more complex. Take for example the regular expression for a plus symbol. It is literally <code class="highlighter-rouge">r'\+</code>. However look at the regex for something like a variable name: <code class="highlighter-rouge">r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'</code>.</p>
+
+<p>While this is by no means complete, and I would expect this to change over time, some of the tokens we need are math operators (plus, minus, etc), comparison operators (<code class="highlighter-rouge">&lt;</code>, <code class="highlighter-rouge">&gt;</code>, <code class="highlighter-rouge">&lt;=</code>, etc), a variable name token, tokens for our reserved words (<code class="highlighter-rouge">let</code>, <code class="highlighter-rouge">const</code>, <code class="highlighter-rouge">if</code>, <code class="highlighter-rouge">else</code>, <code class="highlighter-rouge">return</code>, etc), parentheses, numbers (float, integer, hex, and octo), and the arrow.</p>
+
+<h3 id="quick-primer-on-regular-expressions">Quick primer on Regular Expressions</h3>
+<p>A regular expression is really just an expression that searches some input string for the pattern. Regular Expressions are insanely powerful and power a lot of different applications, for example email or phone validation. To build a regular expression, I would recommend using something like <a href="https://regex101.com/" target="_blank">regex101.com</a> to test what you think is a valid regular expressions.</p>
+
+<p>A common Regular expression is <code class="highlighter-rouge">[a-zA-Z0-9]</code>. The brackets mean match anything inside of these two brackets. So the previous pattern will match any letter, uppercase or lowercase, or number that is between 0 and 9. If you want to match any character more than once you can write something like <code class="highlighter-rouge">[a-zA-Z0-9]{2}</code> which will execute the match exactly twice.</p>
+
+<p>But often times you find yourself wanting to match an unknown number of times. For that, you could use the <code class="highlighter-rouge">+</code> or <code class="highlighter-rouge">*</code> operators. The <code class="highlighter-rouge">+</code> operator means match one or more times and the <code class="highlighter-rouge">*</code> matches zero or more times. There is also the question mark which means zero or one times.</p>
+
+<p>This is by no means a comprehensive or even good intro to regular expression, but it is still necessary to be able to read these for what comes next. <a href="https://ryanstutorials.net/regular-expressions-tutorial/" target="_blank">Here is a link to a much better regular expression tutorial</a></p>
+
+<p>Know that we all understand regular expressions a little bit, let’s define our lexer. Of course the first step is to import Ply. On the top of the lexer file (which in Arbor is <a href="https://github.com/radding/Arbor/blob/master/src/lexer/__init__.py" target="_blank"><code class="highlighter-rouge">src/lexer/__init__.py</code></a>) import Ply like so: <code class="highlighter-rouge">import ply.lex as lex</code>. Technically you are importing the lexer only and not Ply as a whole, and that’s what we want.</p>
+
+<p>Next I like to set up some code that helps us debugs and one line in particular is very important to the rest of the compiler. At the very bottom of the page, you need to instantiate a lexer. This is easy enough: <code class="highlighter-rouge">lexer = lex.lex()</code>. The <code class="highlighter-rouge">lexer</code> instantiated here is what the parser will use to tokenize your input. This next function, while not required, is essential to be able to run our lexer independently of the parser:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def lex(data):
+    lexer.input(data)
+    # Tokenize
+    tokens = []
+    while True:
+        tok = lexer.token()
+        if not tok: 
+            break      # No more input
+        tokens.append(tok)
+        pass
+    return tokens
+</code></pre>
+</div>
+
+<p>Here, data is the string I want to tokenize. What this function does is tokenize the input, iterates until there are no more tokens, and appends the tokens to some list. I use this function to test my lexer in my unit tests (that code can be found here: <a href="https://github.com/radding/Arbor/blob/master/tests/lexer/TestLexer.py" target="_blank"><code class="highlighter-rouge">tests/lexer/TestLexer.py</code></a>), and you can use this function to do what ever you want to the stream of tokens. Another common use is to just print out the individual tokens.</p>
+
+<p>To define our real tokens, we have to do two things. The first is set up a list of tokens called <code class="highlighter-rouge">tokens</code>. These are just the names of the tokens, with out the pattern. Ply uses this list in order to recognize tokens while the lexer is analyzing a string. My list of tokens looks like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>tokens = [
+    "INT",
+    "FLOAT",
+    "PLUS",
+    "MULTI",
+    "DIV",
+    "SUB",
+    "NAME",
+    "LPAREN",
+    "RPAREN",
+    "COLON",
+    "COMMA",
+    "SEMICOLON",
+    "ARROW",
+    "EQ",
+    "OCT",
+    "HEX",
+    'GT',
+    'LT',
+    'GTE',
+    'LTE',
+]
+</code></pre>
+</div>
+
+<p>It is a kind of standard to make your token names all upper case, and it also helps you denote what is a parser expression and what is a token when we move on to the parser.</p>
+
+<p>After the list of tokens is defined, you can define your reserved keywords. The easy way to do this is to define a dictionary with your reserved word as the key and the token name as the value. For example, if the only reserved keyword is <code class="highlighter-rouge">foofoo</code> and its token is <code class="highlighter-rouge">FOOFOO</code> then our reserved keyword dict would look like this: <code class="highlighter-rouge"><span class="p">{</span><span class="nt">"foofoo"</span><span class="p">:</span><span class="w"> </span><span class="s2">"FOOFOO"</span><span class="p">}</span></code>. After that dictionary is defined, all we need to do is append it to the tokens list. and that is trivial: <code class="highlighter-rouge">tokens += list(reservedKeyWords.values())</code>. Your code should look similar to this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>reserved = {
+    'if' : 'IF',
+    'else' : 'ELSE',
+    'done' : "DONE",
+    'return': "RETURN",
+    "const" : "CONST",
+    "let": "LET",
+    'int': 'INTTYPE',
+    'float': 'FLOATTYPE',
+    'char': 'CHARTYPE',
+    'function': 'FUNCTIONTYPE',
+}
+
+tokens += list(reserved.values())
+</code></pre>
+</div>
+
+<p>Finally, we can define the patterns for our tokens. There are two ways we can define a pattern: either using a regular expression string, or by using a function that has a regular expression as its <a href="http://www.pythonforbeginners.com/basics/python-docstrings" target="_blank">docstring</a>. Whether you use a function or a string, both must start with a <code class="highlighter-rouge">t_</code>. So a token to define integers would look like: <code class="highlighter-rouge">t_INT = r'[0-9]+</code>. One important thing to note, is that tokens are resolved in the order the appear. If you have these two rules:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>t_SINGINT = r'[0-9]'
+t_INT = r'[0-9]+'
+</code></pre>
+</div>
+
+<p>and you give the lexer this input: <code class="highlighter-rouge">'9'</code> it will resolve to SINGINT, even if they are both valid.</p>
+
+<p>Another thing to consider is when to use functions rather than strings. I use functions when I want to do something a bit more complex than matching. Every other time, I just use strings. For example, handling reserved keywords. The pattern to handle names is <code class="highlighter-rouge">r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'</code>. This will match everything that looks like a variable name. It will match <code class="highlighter-rouge">aBrA32fdfareq_Reqdasf</code> and it will match <code class="highlighter-rouge">return</code>. In order to make sure the token resolves correctly, inside of the <code class="highlighter-rouge">t_NAME</code> function, I have code that checks the dictionary for the word. If the word is resolved, then I change the type of the token. Else I simply keep the token the same. Here is my <code class="highlighter-rouge">t_NAME</code> function:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def t_NAME(t):
+    r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'
+    print("this is a name:", t.value)
+    t.type = reserved.get(t.value, "NAME")
+    return t
+</code></pre>
+</div>
+
+<p>All functions must return a token if you want to use that token later. You can return nothing and that pattern will be ignored (not put on the token stream).</p>
+
+<p>One place this is really useful is comments and tracking line numbers. To track line numbers, I just have a pattern that matches <code class="highlighter-rouge">\n+</code> and adds the number of newlines to the lexer’s lineno variable:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def t_NEWLINE(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+    pass
+</code></pre>
+</div>
+
+<p>For comments, I don’t even do anything in the function:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def t_BLOCKCOMMNET(t):
+    r'/\*(.|\n)*\*/'
+    pass
+
+def t_COMMENT(t):
+    r'//.*'
+    pass
+</code></pre>
+</div>
+
+<p>Two last important things to speak about are ignoring certain characters and handling lexing errors.</p>
+
+<p>You don’t want to define a token for every. single. character. But if you don’t tell the lexer about a character, the Lexer dies. So you can define a function that matches the pattern you want to ignore. Or you can make a string, called <code class="highlighter-rouge">t_ignore</code>, to tell the parser to ignore some characters. Here I ignore things like spaces or tabs. You can write this to ignore anything you want but it must be a string!</p>
+
+<p>Finally, you may want to handle errors. To do this, you can use the <code class="highlighter-rouge">t_error</code> function. In this function, you can tell the lexer to do many things. If you want the lexer to skip any character that causes then lexer to die, you can can tell the lexer to skip it. You can also just log the error and quit the lexer, which is what I do.</p>
+
+<p>After you define all of your tokens, you should be able to run your code. If you wrote a <code class="highlighter-rouge">lex</code> function like the one I showed earlier, all you really need to do is pass in a string and you can print out the token stream.</p>
+
+<h2 id="the-wrap-up">The Wrap up.</h2>
+<p>In this post, we learned how build a lexer using Python. The initial idea was to write about both the Lexer and Parser this week, but this article went a little long. Next week I will definitely talk about the parser and how to build it in python.</p>
+
+<p>The code for Arbor’s lexer can be found in the GitHub repo specifically <a href="https://github.com/radding/Arbor/blob/master/src/lexer/__init__.py" target="_blank">here</a>.  If you have any questions or comments, feel free to reach out to me on twitter or through email, or even the comments!</p>
+
+    </div>
+    
+    <div class="post_wrapper">
+      <footer class="post_footer cf">
+        <div class="post_share">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=Completely Useless Fun Project: Parts Of The Compiler&url=http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://facebook.com/sharer.php?u=http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://plus.google.com/share?url=http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+        </div>
+        <div class="post_tag">
+          <span>Tags:</span>
+          
+          <a href="/tags#programming" class="tag">programming</a>
+          
+          <a href="/tags#Arbor" class="tag">Arbor</a>
+          
+          <a href="/tags#New Language" class="tag">New Language</a>
+          
+          <a href="/tags#Functional" class="tag">Functional</a>
+          
+          <a href="/tags#web assembly" class="tag">web assembly</a>
+          
+          <a href="/tags#arbor" class="tag">arbor</a>
+          
+          <a href="/tags#completely useless fun project" class="tag">completely useless fun project</a>
+          
+          <a href="/tags#parser" class="tag">parser</a>
+          
+          <a href="/tags#lexing" class="tag">lexing</a>
+          
+        </div>
+      </footer>
+    </div>
+  </article> <!-- End Section Post -->
+
+  <section class="author cf">
+    <div class="post_wrapper">
+      <div class="author_image">
+        <img src="/assets/img/face.jpg" alt="Author face">
+      </div>
+      <div class="author_info">
+        <h2 class="author_title">Yoseph Radding</h2>
+        <p class="author_subtitle"><p>Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
+</p>
+        <div class="author_social">
+          
+          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
+          
+          
+          
+
+          
+          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="http://yoseph.tech" target="_blank">http://yoseph.tech</a></span>
+          
+          
+            <span>
+              <a href="https://twitter.com/raddingy" target="_blank">
+                <i class="fa fa-twitter" aria-hidden="true"></i> @raddingy
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    </div>
+  </section> <!-- End Section Author -->
+
+  <section class="recent_box">
+    <div class="post_wrapper">
+      <h2 class="recent_title">Recent posts</h2>
+      <div class="recent_list">
+        
+          
+            <a href="/completely-useless-fun-project-parts-of-the-compiler/" class="recent_item" style="background-image: url( /assets/img/compilers.jpg )"><span>Completely Useless Fun Project: Parts Of The Compiler</span></a>
+          
+        
+          
+            <a href="/completely-useless-fun-project-build-a-new-programming-language/" class="recent_item" style="background-image: url( /assets/img/programming-languages.jpg )"><span>Completely Useless Fun Project: Building A New Programming Language</span></a>
+          
+        
+          
+            <a href="/building-production-code/" class="recent_item" style="background-image: url( /assets/img/code_screen_shot.jpg )"><span>Building Production Code</span></a>
+          
+        
+          
+            <a href="/building-an-arcade-controller/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building An Arcade Controller</span></a>
+          
+        
+          
+            <a href="/building-a-raspberry-pi-arcade-machine/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building A Raspberry Pi Arcade Machine</span></a>
+          
+        
+          
+            <a href="/relaunching-my-blog/" class="recent_item" style="background-image: url( /assets/img/detroit.jpg )"><span>Relaunching My Blog</span></a>
+          
+        
+      </div>
+    </div>
+  </section> <!-- End Section Recent Box -->
+  
+  
+<section class="comment_area">
+  <div class="comment_wrapper">
+    
+    <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://yoseph-tech.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                            
+    
+  </div>
+</section> <!-- End Section Comment Area -->
+  
+</main> <!-- End Section Post Content -->
+
+
+<footer class="main_footer">
+  <div class="wrapper">
+    
+<ul class="social_footer">
+  
+  
+    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+  
+  
+  
+    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
+  
+  
+  
+  
+    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+  
+</ul>
+    <div class="copyright">
+      <p>&copy; 2017 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
+      <p><em>All opinions expressed are my own</em></p>
+    </div>
+  </div>
+</footer> <!-- End Section Footer -->
+
+
+  
+<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
+  
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/jquery.vide.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+<script id="dsq-count-scr" src="//yoseph-tech.disqus.com/count.js" async></script>
+<!-- End Javascript -->
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-83670049-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-83670049-2');
+</script>
+
+</body>
+</html>
