@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://yoseph.tech/feed.xml" rel="self" type="application/atom+xml" /><link href="http://yoseph.tech/" rel="alternate" type="text/html" /><updated>2017-11-10T09:07:25-05:00</updated><id>http://yoseph.tech/</id><title type="html">Yoseph.TECH | All things Tech</title><subtitle>An awesome website for tech related shenanigans. Maybe even the ocassional cat picture. (I have the best cat)
+</subtitle><entry><title type="html">Completely Useless Fun Project: Parts Of The Compiler</title><link href="http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/" rel="alternate" type="text/html" title="Completely Useless Fun Project: Parts Of The Compiler" /><published>2017-11-08T03:04:06-05:00</published><updated>2017-11-08T03:04:06-05:00</updated><id>http://yoseph.tech/completely-useless-fun-project:-parts-of-the-compiler</id><content type="html" xml:base="http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/">If you have done C/C++ or Objective-C work on MacOS (There is a project called [GNUStep](http://www.techotopia.com/index.php/Installing_and_Using_GNUstep_and_Objective-C_on_Linux){:target=&quot;_blank&quot;} that allows you to run Obj-C on Linux), you may have heard of Clang and LLVM, or maybe Clang/LLVM. It may have confused you because there are two names for a seemingly single piece of software. It may confuse you further to point out that these *are* two different things, but two pieces to the same puzzle.
+
+What Clang and LLVM are, are the pieces of a compiler. A compiler is really just a single group of processes that takes in some source code and outputs some other code. This output code could be Assembly code, Java ByteCode, hell even [Javascript](https://en.wikipedia.org/wiki/Source-to-source_compiler){:target=&quot;_blank&quot;}. Like all good programming problems, compiler construction can be broken down into various parts. 
+
+## First, a history
+It may horrify you to know that computer programs weren't always written in english. For many decades, Programs were written by hand in assembly language. It wasn't until 1952 that totally [bad ass Rear Admiral Grace Hopper](https://en.wikipedia.org/wiki/Grace_Hopper){:target=&quot;_blank&quot;} built the first compiler and coined the term (she also coined the term debugging after pulling a literal moth out of her computer's circuits).
+
+This first compiler wasn't much of anything. It really just operated as more of a linker or a loader than what our modern compilers are. The first real modern compiler was introduced in 1957 by John W Backus and his team at IBM for [Fortran](https://www.obliquity.com/computer/fortran/history.html){:target=&quot;_blank&quot;}.
+
+And compiler design hasn't changed all that much since then.
+
+## Design of the modern Compiler
+The Fortran compiler was built in an era where computers were insanely expensive, huge and slow. In order for Fortran to compete with hand coding assembly, it needed to be *fast*, at least as fast as hand written code. To do this, the compiler was broken down into two parts: the frontend and the backend (that is what Clang and LLVM are, the frontend and backend respectively). This made it easier to apply transformations and optimizations independently.
+
+{%include Caption.html url=&quot;https://www.tutorialspoint.com/compiler_design/images/compiler_analysis_synthesis.jpg&quot; alt=&quot;*The phases of the compiler*&quot; description=&quot;*The phases of the compiler*&quot; %}
+
+At the highest level, the frontend takes the source code and outputs what is called an **Intermediate Representation** or IR. This may look like assembly code, all though it doesn't have to, but it isn't. This code is how compilers internally represent the source code. IRs are used so that that it can be optimized and translated much easier. They also must be designed in such away that the *intent* of the original source code is preserved and be independent of any source or target language. IRs can be either data structures or textual code based outputs. Then the backend takes the IR and output its targeted language. 
+
+There are a few advantages to this design. The first is that this is super easy to optimize. You can optimize your IR independently of your target language and vice versa, creating an insanely fast program. The real power, however, is that you can make your compiler as portable as possible. For example, since your frontend deals with breaking the backend down, you don't need to re-implement this part of the application. If you want to target Intel's x86 architecture and ARM architecture with your programming language, all you need to do is replace the backend of the compiler. In fact, this is how GCC and compilers built on LLVM works. 
+
+Again, for this compiler, I am building the frontend of the compiler and then going to let LLVM handle the output.
+
+### Breakdown of the frontend of the compiler
+Like all problems in programming, the frontend of the compiler can further be broken down into its own parts. 
+
+{% include Caption.html url=&quot;http://pintokarsanda.blog.binusian.org/files/2014/03/front-and-back-end-compilers.png&quot; alt=&quot;*Breakdown of the frontend and backend of a compiler*&quot; description=&quot;*Breakdown of the frontend and backend of a compiler*&quot; %}
+
+The steps the frontend needs to transform your language into its IR are Lexical Analysis, Syntactic Analysis and Semantical Analysis. Lexical analysis, aka lexing is the process of taking a stream of characters and converting it into a stream of *tokens*. Tokens are really just a pair that describes what certain what a sequence of characters means, and the value of the characters. For example the string `let foo = 1` might have the following tokens: (&quot;LET&quot;, &quot;let&quot;), (&quot;NAME&quot;, &quot;foo&quot;), (&quot;EQ&quot;, &quot;=&quot;), and (&quot;NUMBER&quot;, &quot;1&quot;). The result of the lexical analysis then goes into the next phase. 
+
+And that next Phase is Syntactical analysis. Syntactic analysis, also known as parsing, is when you take a stream of tokens and find out what they all mean. This is basically how you describe the grammar of your language. This is how languages know that both `(2 * 5) + (6 * 2)` and `10 + 12` are valid statements. After this Syntactic Analysis is done, the compiler moves on to semantical analysis.
+
+In this step, the compiler figures out what the individual statements mean. This step involves your [abstract syntax tree, otherwise known as an AST](https://ruslanspivak.com/lsbasi-part7/){:target=&quot;_blank&quot;}. This is the step that understands that when you write `1 + 1` that you want to add the two numbers. The parser from the last step builds up your AST so that you could easily traverse this tree and output your IR.
+
+## Arbor's Lexer
+So now that we understand the parts of the compiler a little bit better, let's discuss putting this into code, specifically the lexer. If you want to check out some of the code written during this post, the GitHub repo can be found here: [radding/Arbor](https://github.com/radding/Arbor){:target=&quot;_blank&quot;}. If you want to see the parts specific to this post look at the file `src/lexer/__init__.py`. 
+
+The only thing you need to install to start building your own lexers and parsers is [PLY](http://www.dabeaz.com/ply/){:target=&quot;_blank&quot;}. Ply is a great library that implements the popular [lex](http://dinosaur.compilertools.net/lex/){:target=&quot;_blank&quot;} and [yacc](http://dinosaur.compilertools.net/yacc/){:target=&quot;_blank&quot;} tools in Python. Lex is the tool that you use to build out your lexer and Yacc, which stands for Yet Another Compiler Compiler, is what you use to build your parser. 
+
+To install Ply all you really need to do is run `pip install pip`. If you want to run the Arbor code, you can simply clone the GitHub Repo and install the `requirements.txt` file by running `pip install -r requirements.txt`. After that is all set up, we can move on to actually building some stuff.
+
+## The Lexer
+The first step to building the lexer is thinking about the symbols you need and the patterns they have. Ply uses [regular expression](https://en.wikipedia.org/wiki/Regular_expression){:target=&quot;_blank&quot;} in order to match the characters to their proper token types. Some tokens are incredibly simple, a single character for example. Some are a bit more complex. Take for example the regular expression for a plus symbol. It is literally `r'\+`. However look at the regex for something like a variable name: `r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'`.
+
+While this is by no means complete, and I would expect this to change over time, some of the tokens we need are math operators (plus, minus, etc), comparison operators (`&lt;`, `&gt;`, `&lt;=`, etc), a variable name token, tokens for our reserved words (`let`, `const`, `if`, `else`, `return`, etc), parentheses, numbers (float, integer, hex, and octo), and the arrow.
+
+### Quick primer on Regular Expressions
+A regular expression is really just an expression that searches some input string for the pattern. Regular Expressions are insanely powerful and power a lot of different applications, for example email or phone validation. To build a regular expression, I would recommend using something like [regex101.com](https://regex101.com/){:target=&quot;_blank&quot;} to test what you think is a valid regular expressions. 
+
+A common Regular expression is `[a-zA-Z0-9]`. The brackets mean match anything inside of these two brackets. So the previous pattern will match any letter, uppercase or lowercase, or number that is between 0 and 9. If you want to match any character more than once you can write something like `[a-zA-Z0-9]{2}` which will execute the match exactly twice. 
+
+But often times you find yourself wanting to match an unknown number of times. For that, you could use the `+` or `*` operators. The `+` operator means match one or more times and the `*` matches zero or more times. There is also the question mark which means zero or one times.
+
+This is by no means a comprehensive or even good intro to regular expression, but it is still necessary to be able to read these for what comes next. [Here is a link to a much better regular expression tutorial](https://ryanstutorials.net/regular-expressions-tutorial/){:target=&quot;_blank&quot;}
+
+Know that we all understand regular expressions a little bit, let's define our lexer. Of course the first step is to import Ply. On the top of the lexer file (which in Arbor is [`src/lexer/__init__.py`](https://github.com/radding/Arbor/blob/master/src/lexer/__init__.py){:target=&quot;_blank&quot;}) import Ply like so: `import ply.lex as lex`. Technically you are importing the lexer only and not Ply as a whole, and that's what we want. 
+
+Next I like to set up some code that helps us debugs and one line in particular is very important to the rest of the compiler. At the very bottom of the page, you need to instantiate a lexer. This is easy enough: `lexer = lex.lex()`. The `lexer` instantiated here is what the parser will use to tokenize your input. This next function, while not required, is essential to be able to run our lexer independently of the parser:
+
+    def lex(data):
+        lexer.input(data)
+        # Tokenize
+        tokens = []
+        while True:
+            tok = lexer.token()
+            if not tok: 
+                break      # No more input
+            tokens.append(tok)
+            pass
+        return tokens
+
+Here, data is the string I want to tokenize. What this function does is tokenize the input, iterates until there are no more tokens, and appends the tokens to some list. I use this function to test my lexer in my unit tests (that code can be found here: [`tests/lexer/TestLexer.py`](https://github.com/radding/Arbor/blob/master/tests/lexer/TestLexer.py){:target=&quot;_blank&quot;}), and you can use this function to do what ever you want to the stream of tokens. Another common use is to just print out the individual tokens. 
+
+To define our real tokens, we have to do two things. The first is set up a list of tokens called `tokens`. These are just the names of the tokens, with out the pattern. Ply uses this list in order to recognize tokens while the lexer is analyzing a string. My list of tokens looks like this: 
+
+    tokens = [
+        &quot;INT&quot;,
+        &quot;FLOAT&quot;,
+        &quot;PLUS&quot;,
+        &quot;MULTI&quot;,
+        &quot;DIV&quot;,
+        &quot;SUB&quot;,
+        &quot;NAME&quot;,
+        &quot;LPAREN&quot;,
+        &quot;RPAREN&quot;,
+        &quot;COLON&quot;,
+        &quot;COMMA&quot;,
+        &quot;SEMICOLON&quot;,
+        &quot;ARROW&quot;,
+        &quot;EQ&quot;,
+        &quot;OCT&quot;,
+        &quot;HEX&quot;,
+        'GT',
+        'LT',
+        'GTE',
+        'LTE',
+    ]
+
+It is a kind of standard to make your token names all upper case, and it also helps you denote what is a parser expression and what is a token when we move on to the parser. 
+
+After the list of tokens is defined, you can define your reserved keywords. The easy way to do this is to define a dictionary with your reserved word as the key and the token name as the value. For example, if the only reserved keyword is `foofoo` and its token is `FOOFOO` then our reserved keyword dict would look like this: `{&quot;foofoo&quot;: &quot;FOOFOO&quot;}`. After that dictionary is defined, all we need to do is append it to the tokens list. and that is trivial: `tokens += list(reservedKeyWords.values())`. Your code should look similar to this:
+
+    reserved = {
+        'if' : 'IF',
+        'else' : 'ELSE',
+        'done' : &quot;DONE&quot;,
+        'return': &quot;RETURN&quot;,
+        &quot;const&quot; : &quot;CONST&quot;,
+        &quot;let&quot;: &quot;LET&quot;,
+        'int': 'INTTYPE',
+        'float': 'FLOATTYPE',
+        'char': 'CHARTYPE',
+        'function': 'FUNCTIONTYPE',
+    }
+
+    tokens += list(reserved.values())
+
+Finally, we can define the patterns for our tokens. There are two ways we can define a pattern: either using a regular expression string, or by using a function that has a regular expression as its [docstring](http://www.pythonforbeginners.com/basics/python-docstrings){:target=&quot;_blank&quot;}. Whether you use a function or a string, both must start with a `t_`. So a token to define integers would look like: `t_INT = r'[0-9]+`. One important thing to note, is that tokens are resolved in the order the appear. If you have these two rules:
+
+    t_SINGINT = r'[0-9]'
+    t_INT = r'[0-9]+'
+
+and you give the lexer this input: `'9'` it will resolve to SINGINT, even if they are both valid.
+
+Another thing to consider is when to use functions rather than strings. I use functions when I want to do something a bit more complex than matching. Every other time, I just use strings. For example, handling reserved keywords. The pattern to handle names is `r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'`. This will match everything that looks like a variable name. It will match `aBrA32fdfareq_Reqdasf` and it will match `return`. In order to make sure the token resolves correctly, inside of the `t_NAME` function, I have code that checks the dictionary for the word. If the word is resolved, then I change the type of the token. Else I simply keep the token the same. Here is my `t_NAME` function:
+
+    def t_NAME(t):
+        r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'
+        print(&quot;this is a name:&quot;, t.value)
+        t.type = reserved.get(t.value, &quot;NAME&quot;)
+        return t
+
+All functions must return a token if you want to use that token later. You can return nothing and that pattern will be ignored (not put on the token stream).
+
+One place this is really useful is comments and tracking line numbers. To track line numbers, I just have a pattern that matches `\n+` and adds the number of newlines to the lexer's lineno variable:
+
+    def t_NEWLINE(t):
+        r'\n+'
+        t.lexer.lineno += len(t.value)
+        pass
+
+For comments, I don't even do anything in the function:
+
+    def t_BLOCKCOMMNET(t):
+        r'/\*(.|\n)*\*/'
+        pass
+
+    def t_COMMENT(t):
+        r'//.*'
+        pass
+
+Two last important things to speak about are ignoring certain characters and handling lexing errors.
+
+You don't want to define a token for every. single. character. But if you don't tell the lexer about a character, the Lexer dies. So you can define a function that matches the pattern you want to ignore. Or you can make a string, called `t_ignore`, to tell the parser to ignore some characters. Here I ignore things like spaces or tabs. You can write this to ignore anything you want but it must be a string!
+
+Finally, you may want to handle errors. To do this, you can use the `t_error` function. In this function, you can tell the lexer to do many things. If you want the lexer to skip any character that causes then lexer to die, you can can tell the lexer to skip it. You can also just log the error and quit the lexer, which is what I do. 
+
+After you define all of your tokens, you should be able to run your code. If you wrote a `lex` function like the one I showed earlier, all you really need to do is pass in a string and you can print out the token stream. 
+
+## The Wrap up.
+In this post, we learned how build a lexer using Python. The initial idea was to write about both the Lexer and Parser this week, but this article went a little long. Next week I will definitely talk about the parser and how to build it in python. 
+
+The code for Arbor's lexer can be found in the GitHub repo specifically [here](https://github.com/radding/Arbor/blob/master/src/lexer/__init__.py){:target=&quot;_blank&quot;}.  If you have any questions or comments, feel free to reach out to me on twitter or through email, or even the comments!</content><author><name></name></author><category term="programming" /><category term="Arbor" /><category term="New Language" /><category term="Functional" /><category term="web assembly" /><category term="arbor" /><category term="completely useless fun project" /><category term="parser" /><category term="lexing" /><summary type="html">If you have done C/C++ or Objective-C work on MacOS (There is a project called GNUStep that allows you to run Obj-C on Linux), you may have heard of Clang and LLVM, or maybe Clang/LLVM. It may have confused you because there are two names for a seemingly single piece of software. It may confuse you further to point out that these are two different things, but two pieces to the same puzzle.</summary></entry><entry><title type="html">Completely Useless Fun Project: Building A New Programming Language</title><link href="http://yoseph.tech/completely-useless-fun-project-build-a-new-programming-language/" rel="alternate" type="text/html" title="Completely Useless Fun Project: Building A New Programming Language" /><published>2017-11-03T04:40:08-04:00</published><updated>2017-11-03T04:40:08-04:00</updated><id>http://yoseph.tech/completely-useless-fun-project:-build-a-new-programming-language</id><content type="html" xml:base="http://yoseph.tech/completely-useless-fun-project-build-a-new-programming-language/">Writing a new language is often seen as magical. New languages and tools pop up from time to time seemingly from the ether. But this isn't the case, languages have to come from somewhere. [Here is Eric Lippert](https://softwareengineering.stackexchange.com/a/84361){:target=&quot;_blank&quot;}, a former principle developer on the C# compiler, talking about the response he gets when he tells people he designs languages.
+
+Because of this mystique around languages and their tooling, most people think building a programming language as difficult. But it doesn't have to be this way.
+
+And to prove it, I'm going to write a series that chronicles me developing this language which I will call **Arbor**. 
+
+## Inspiration for Arbor
+The primary motivation for me to build Arbor was Web Assembly. I am fascinated with Web Assembly and primarily wanted a way to play with it. So I decided to make a programming language months ago that specifically targets Web Assembly. 
+
+{% include Caption.html url=&quot;https://upload.wikimedia.org/wikipedia/commons/3/30/WebAssembly_Logo.png&quot; alt=&quot;*Web assembly logo*&quot; description=&quot;*Web assembly logo*&quot; %}
+
+For those who  don't know, [Web Assembly or wasm](https://en.wikipedia.org/wiki/WebAssembly){:target=&quot;_blank&quot;} is a specification that is still in its infancy. It aims to be, well, the assembly code for the web. It promises nearly native speeds for web app front ends. The code for Wasm is a kind of stripped down javascript, making it faster to parse and hopefully faster to execute. In fact, the original demo for web assembly was the unity demo game, Angry Bots that ran in Firefox and Chrome back in 2015. The game isn't like Crysis, but it is still impressive how well it ran. While I can't find that demo, here is a new demo on [webassembly.org](http://webassembly.org/demo/){:target=&quot;_blank&quot;}
+
+The primary point of Wasm was to enable C++ to be compiled for the web and have really big compute intensive processes running inside your browser. Today, Wasm really only supports C/C++ and Rust. Soon though, we will add Arbor to that list ;)
+
+However, as I said, web assembly is in its infancy. According to [caniuse.com](https://caniuse.com/#search=webassembly){:target=&quot;_blank&quot;}, only 65.34% of all browsers support wasm as of today, November 3rd, 2017 and Safari just got support back in September. But this isn't really a problem because webassembly can fall back to [asm.js](http://asmjs.org/){:target=&quot;_blank&quot;} if need be. And either way, it seems the support for Wasm is growing, so that 65% number will only get larger. 
+
+Anyway, aside from wanting to use Wasm, I didn't really have any other requirements. I knew I wanted it to be easy to use and read (who wants a language that is difficult to look at. I'm looking at you perl!)
+
+{% include Caption.html url=&quot;http://www.zoitz.com/comics/perl_small.png&quot; alt=&quot;*Seriously though, I used Perl once and my eyes bled for weeks afterwards*&quot; description=&quot;*Seriously though, I used Perl once and my eyes bled for weeks afterwards*&quot; %}
+
+But then this week I had an idea. Why not make it a pure functional language? Functional languages are all the rage right now and they have some really cool concepts that I would like to implement, like no side effects or guaranteed no crashing (I'll admit, the second one is a bit ambitious). The only problem is I looked around and functional languages have particularly alien syntax. Coming from C like languages, most functional language's syntax was a little hard to read.
+
+{% include Caption.html url=&quot;https://i.stack.imgur.com/U83Iz.png&quot; alt=&quot;*Haskell code. It looks foreign and weird to someone who is familiar with  C like languages*&quot; description=&quot;*Haskell Code. It looks foreign and weird to someone who is familiar with  C like languages*&quot;%}
+
+But then I saw [Elm](http://elm-lang.org/){:target=&quot;_blank&quot;}. While not particularly beautiful to read, it wasn't actually that bad. So elm became my starting point. But even then, I wanted a language that someone without any Arbor experience can jump into and pick up without much difficulty. So I decided to take some things from Python, JavaScript and C/C++. 
+
+## Design of Arbor (First Iteration)
+
+### Typing and Assignment
+The first thing I wanted was Python like Typing; basically dynamically, but strongly typed. This means an expression like this: `'x' + 1` is invalid and will throw an error, but these two statements are valid: `x = 1; x = 'dd';`. However, to maintain safety, I will also like optional parameter type checking. If you define a functions like so: `(a:int, b:string)` then you would expect a to always be an int and string to always be a string. 
+
+The second thing I decided on was that everything must be assigned. In order to make the language simpler to implement, I did away with any special keywords to define a function. Unlike in Python, JavaScript, or C/C++ a function is inherently anonymous, unless assigned to a variable. The way to define a function would be: `() -&gt; &lt;function body&gt;`. In order to keep that function around you would need to do something like: `foo = () -&gt; &lt;function body&gt;`. Of course, this runs the risk of a programmer accidentally overwriting their function.
+
+To make the language &quot;safer&quot;, I decided that every variable had to be declared before you use it. This prevents a programmer,especially one with atrocious spelling like me, from accidentally declaring a variable because of a spelling error in one place. For right now, the only two keywords to define a variable is `let` and `const`. I decided on `const` because it is pretty self explanatory that the variable is constant. Plus C/C++ and Javascript use the `const` keyword, so I think it would be pretty easy for most developers to pick it up. 
+
+The choice of `let` has really nothing to do  with javascript, all though maybe it does a bit. I choose the keyword `let` to more closely align with &quot;math speak&quot; (i.e `let x be a value in universe`). I also chose let because it corresponds to a [lambda abstraction](https://en.wikipedia.org/wiki/Let_expression#Definition){:target=&quot;_blank&quot;} and [lambda calculus](https://en.wikipedia.org/wiki/Lambda_calculus){:target='_blank'} is really the foundation of all pure functional languages.
+
+I'm still torn about providing type declarations, such as `int`, `float`, `char`, and `array` because I don't see them as completely necessary. It may be nice to have if for no other reason than it makes the language easier to read. At the same time however, since the type can be inferred from what you are assigning a variable to, and function definitions provide optional type checking, I don't know if this is absolutely necessary. I am leaning towards no, but If I do add support for type declarations, it will be with the `let` keyword, not instead of. 
+
+### Functions Definitions
+I also liked the [JavaScript arrow function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions){:target=&quot;_blank&quot;} syntax (this is part of the reason why arbor has `-&gt;` to define functions), and especially the behaviour where a single line means return and a function body means do this whole function body. But at the same time I like Python's no curly brace syntax. So what I did was do something that a lot of other languages do: I defined an end statement. So in Arbor, you would define a function two ways: 
+
+    let foo = (a, b, c) -&gt; a + b + c;
+
+or 
+
+    let foo = (a, b, c) -&gt; 
+        return a + b + c;
+    done;
+
+Another thing I like about python is the way you can implement default parameters. In arbor it will be done similarly: 
+
+    (a = 1, b = 2) -&gt; a + b;
+
+One thing that a lot of people complain about in Python, and this also trips up people coming from languages such as Java or C/C++, is that you can pass in any type into a function. This could cause issue where you expect a string, but instead receive an int, causing your application to crash. All though this is something you're unit tests should catch, I also wanted to &quot;fix&quot; this with compile time type checking. Plus I think this makes the language that much more descriptive in my mind. If you want type checking and defaults, I think it should look like this: 
+
+    (a:int, b:int = 2) -&gt; a + b;
+
+Taking another principle from Python is packing and unpacking of variables in functions. Similarly to `function(...args)` in es6, python allows you to define lift over params as such: `def foo(a, *args)`. Arbor will do something similar: `foo = (a, b, *args) -&gt; ...`. Then you can call this function like so: `foo(1, 2, 3, 4, 5, 6)`.
+And like Python, I also want Arbor to support named leftover variables: `def foo(a, b, **kwargs)`, in arbor would be: `foo = (a, b **kwargs) -&gt; ...`. Where `kwargs` is a dictionary. 
+
+And finally variable unpacking. Python has this really neat concept called unpacking if you have a function definition like 
+
+    def foo(a, b, c, d, e, f, g):
+        pass
+
+you can call that function like this: 
+
+    arr = [1, 2, 3, 4, 5, 6, 7]
+    foo(*arr)
+
+    # or
+
+    vals = {
+        &quot;a&quot;: 1,
+        &quot;b&quot;: 2,
+        &quot;c&quot;: 3,
+        &quot;d&quot;: 4,
+        &quot;e&quot;, 5,
+        &quot;f&quot;: 6,
+        &quot;g&quot;: 7 
+    }
+    foo(**arr)
+
+With default parameters, any parameter not in the dict or array will be the default. I want Arbor to support this exactly the same way:
+
+    foo = (a, b, c, d, e, f, g) -&gt; null;
+    arr  = [1, 2, 3, 4, 5, 6, 7];
+    foo(*arr)
+
+    // and
+
+    dict = {
+        a: 1,
+        b: 2,
+        c: 3,
+        d: 4,
+        e: 5,
+        f: 6, 
+        g: 6,
+    }
+    foo(**dict)
+
+### Control and flow
+In true functional programming fasion, I decided to do away with loops. Instead all loops should be implemented using recursion constructs. Additionally, built in functions such as `forEach`, `map`, `filter`, `fold` or `reduce` will be implemented in order to make implementing loop behaviour easier. 
+
+Additionally, as well as having traditional control flow, `if`, `else`, `else if` statements, I will also have haskell like predicates. These could be similar enough to case statements in Elm. These would look like this:
+
+    (a, b) -&gt; 
+        : a &gt; b -&gt; 
+            if (a != b)
+                return &quot;greater than&quot;
+        : a &lt; b -&gt; &quot;less than&quot;;
+        : true -&gt; &quot;equal to&quot;;
+    done;
+
+This should be functionally equivalent to 
+
+    (a, b) -&gt; 
+        if (a &gt; b): 
+            return &quot;greater than&quot;;
+        else if (a &lt; b):
+            return &quot;less than&quot;;
+        else: 
+            return &quot;equal to&quot;;
+        done;
+    done;
+
+And finally, ternary operators. I really like ternary operators. They are elegant and makes code easier to read for small stuff. However, I think JavaScript's and C/C++'s ternary operator leaves something to be desired. I really like Python's ternary operator and that is exactly how ternaries in Arbor should work: `value if &lt;condition&gt; else other value`. 
+
+### Data and Types
+The only data types I want to include in Arbor are Integers, Floats, chars, Arrays, and Dictionaries. A string keyword will be available, but, like C/C++, it is really just an array of chars. Arbor will also provide `true` and `false` keywords that is really just 1 and 0 integers. Arbor should have a typedef operator that allows developers to define their own types. This would be similar to how C defines structs:
+
+    Person = type {
+        name: string,
+        age: int,
+        favorites: array
+    }
+
+This defines a type so that you can do things like 
+
+    person = instantiate(Person);
+    person.name = &quot;yoseph&quot;;
+    person.age = 22;
+    person.favorites = [&quot;programming&quot;, &quot;Arbor&quot;]
+
+or 
+    
+    person = instantiate(Person, name=&quot;yoseph&quot;, age=&quot;22&quot;, favorites);
+
+Functions are also first order citizens so that you can pass them as functions or in new types. Types can also refer to themselves, making the type composable and building complex structures like a tree.
+
+## Tooling and the compiler
+
+I haven't decide much on the tooling for Arbor. I know I will implement some standard function like `instantiate` or `new` (haven't decided to be honest), `forEach`, `map`, `reduce`, `filter`, and `resize`. But these may be just standard library stuff, I'm not sure if they will be built ins. 
+
+The one big decision I made in regards to the compiler, and I know I'm going to get shit for this, is that I will implement it in Python initially. This is an experimental language and I only really care about the end result being amazing. I don't much care for the speed of the compiler. Perhaps in the future I will try to implement it in C/C++ or some other language, but not right now. 
+
+The other reason I chose python for my compiler is that it is easy people to set up. Lex and Bison, which every other compiler how to post uses, are frankly a pain to set up, especially for beginners. The lexing and parsing library I use is called [ply](http://www.dabeaz.com/ply/){:target=&quot;_blank&quot;} It is a great library that is easy to install (`pip install ply`) and easy to use. Take a look at their documentation and see how easy it is to use!
+
+I really want to make building a programming language less scary. For this, I would need to make the compiler as accessible to beginners as possible, and of course Python is an extremely easy to read and easy to pick up language. 
+
+Another big decision I made, and I will talk about this a bit next week, is that I am going to use an LLVM web assembly backend for actually compiling down into Wasm. This decision was made because LLVM is an incredibly optimized compiler. By only creating the frontend of the compiler, I only have to worry about optimizing the frontend output code, and letting LLVM handle the final optimizations. Additionally, this will also make Arbor easier to port to a new target, such as x86 or ARM. 
+
+The last thing I am going to do is work on the run time. While web assembly is cool, it is still missing some things like the ability to manipulate the DOM. I would have to implement an Arbor to Javascript bridge in order to fully realize the power of Wasm. 
+
+## The wrap up. 
+
+This post really laid out the foundations of what I want Arbor to be. Of course, I don't expect all of the requirements that I laid out here to stay the same. I'm  sure behaviour and decisions will change. A lot of syntax changes with be implemented as I decide I like some other syntax better. And If anyone has any suggestions, I would love to hear it!
+
+I'm sure it won't be easy, but I relish the challenge! Next week, I will talk about the parts of the Arbor compiler and maybe get into some actual code behind the compiler! A GitHub repo for all of the code will come shortly. 
+
+**UPDATE November 6, 2017: As promised, [here is the GitHub repo for Arbor](https://github.com/radding/Arbor){:target=&quot;_blank&quot;}</content><author><name></name></author><category term="programming" /><category term="Arbor" /><category term="New Language" /><category term="Functional" /><category term="web assembly" /><category term="arbor" /><category term="completely useless fun project" /><summary type="html">Writing a new language is often seen as magical. New languages and tools pop up from time to time seemingly from the ether. But this isn’t the case, languages have to come from somewhere. Here is Eric Lippert, a former principle developer on the C# compiler, talking about the response he gets when he tells people he designs languages.</summary></entry><entry><title type="html">Building Production Code</title><link href="http://yoseph.tech/building-production-code/" rel="alternate" type="text/html" title="Building Production Code" /><published>2017-10-28T07:32:18-04:00</published><updated>2017-10-28T07:32:18-04:00</updated><id>http://yoseph.tech/building-production-code</id><content type="html" xml:base="http://yoseph.tech/building-production-code/">Last week, I gave a talk at Michigan State's Spartan Hackers. The topic of the talk was building production level code. This is something I have noticed many beginner programmers struggle with from all walks of life. Computer Science graduates, Bootcampers, and self taught programmers all struggle with these concepts when they are just beginning. This was the inspiration behind this talk and I hoped to shed some light on what it takes to build professional level applications. 
+
+## First, a Story
+This is the story of LykeMe, the first startup I built in college. 
+{% include Caption.html url=&quot;https://s3.amazonaws.com/cassandra-platform/images/content/daily/_email/101415-2.jpg?mtime=20151014094802&quot; alt=&quot;*Me with the president of MSU and my Co-founder Josh repping LykeMe*&quot; description=&quot;*Me with the president of MSU and my Co-founder Josh repping LykeMe*&quot; %}
+
+LykeMe was really fun to build, both as a business and as a product. We won some pitch competitions, went to Techweek Detroit and Techweek Chicago in 2015, and got a lot of great press. We were featured in [Cosmopolitian magazine](http://www.cosmopolitan.com/sex-love/news/a32172/student-creates-app-for-lasting-relationships/){:target=&quot;_blank&quot;}, [Self magazine](https://www.self.com/story/tinder-friends-app-finder){:target=&quot;_blank&quot;}, [Inside Higher Ed](https://www.insidehighered.com/news/2016/03/04/most-college-students-probably-arent-using-dating-app-tinder-just-find-friends){:target=&quot;_blank&quot;}, [USA Today](http://college.usatoday.com/2015/03/17/lykeme-app-helps-college-students-find-friends-with-common-interests/){:target=&quot;_blank&quot;} and many other small blogs.
+{% include Caption.html url=&quot;/assets/img/josh_with_check.png&quot; alt=&quot;*Josh holding one of the checks we won! (People's choice Award; MSU Broad Pitch Competition)*&quot; description=&quot;*Josh holding one of the checks we won! (People's choice Award; MSU Broad Pitch Competition)*&quot; %}
+
+It was an incredible journey that culminated in us getting tens of thousands of users. At one point, I personally managed a team of five. This was the first time I was responsible for building a product from start to finish. To say I learned a lot would be an understatement.
+
+## So What Did I Learn?
+This biggest thing I learned was about **scalability**. At this point, most of my peers will roll their eyes and quote (wrongly) [Donald Knuth:](https://en.wikipedia.org/wiki/Donald_Knuth){:target=&quot;_blank&quot;} &quot;premature optimization is the root of all evil.&quot; But just hear me out.
+
+When the topic of scalability, everyone immediately thinks about making sure your application doesn't fail for a ton of users. But that is really only one type of scalability. There are really two types of scaling; the first of which is the one everyone thinks about, scaling with your user base, but the second, less talked about, but arguably more important form is scaling with your code base and your team. Actually, that's not really true. Both are important, but properly scaling your code base and processes to accommodate a larger team and much more code really feeds into scaling an application to support more users. 
+
+### So how do you scale?
+There are some differences between the two parts, but the one, very important, similarity that is really what this post is all about is architecture. 
+
+A well architected solution is the difference between the Burj Khalifa and a house of cards. Good code is well architected. Just read [this quora question about hiring a programmer who takes three hours vs one that takes twelve](https://www.quora.com/Which-programmer-do-you-hire-the-one-who-programs-a-messy-program-in-three-hours-or-the-other-who-does-a-well-structured-program-in-twelve){:target=&quot;_blank&quot;}, and you'll quickly see a recurrring theme. Everyone wants to hire a developer who takes his time to write well structured and clean code. None of that would be possible if the programmer didn't take into account architecture while building his solution. 
+
+MSDN (for those who don't know, MSDN stands for Microsoft Developer Network) [defines architecture](https://msdn.microsoft.com/en-us/library/ee658098.aspx){:target=&quot;blank&quot;} as  the process of defining a structured solution that meets all of the technical and operational requirements, while optimizing common quality attributes such as performance, security, and manageability. It's the second part of this sentence that is the most important part, &quot;optimizing common quality attributes such as performance, security, and manageability.&quot; Optimizing performance means that your application handles large loads seamlessly, and optimizing manageability means that your code base can handle as many hands and change as easily as possible no matter the size of your code base or team. This is why the many answers on the Quora question above prefered the developer who took a long time over the developer who took little time, the simply produced better architected and hence more manageable code. But manageable code also makes it  easier for your application to tackle hopefully increasing traffic, as your code will be much easier to modify when you recognize a piece of code isn't performing well. 
+
+Additionally, architecture also feeds into your infrastructure. If you have a ton of microservices, you will probably have a ton of servers that host each individual service, or a container for each service. Each service has it's own load balancer, application servers and database servers. But if you are doing a monolithic service, you would probably have one proxy server, one application server, and one database server at the minimum. Different architectures require a vastly different infrastructure setup.
+
+### Architectural Styles
+Now that we spoke about why architecture is important and what it is, let's talk about what an architectural style is. An architectural style is really just a reusable solution to common problems. This is an  important concept because it will prevent you from &quot;re-inventing&quot; the wheel every time. Some of these styles are well known, such as everyone's favorite laid out in Roy Fielding's dissertation, [Architectural Styles and the Design of Network-based Software Architectures](https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm){:target=&quot;_blank&quot;}, REST (Quick side note: REST and SOAP are usually compared, but in reality, they are not comparable and you should read Fielding's dissertation and [this, much shorter, stack overflow answer](https://stackoverflow.com/a/19884975/2985233){:target=&quot;_blank&quot;} to learn why!)
+
+Why is it important for software designers to focus on architectural styles? Well most of the problems we face are the same thing posed in many different ways. Take for example authentication for service. A logical way to perform authentication would be to route all application traffic to a single point, check for authentication, pass traffic that passed that check on to the next part of the service and reject all traffic that doesn't. Now think about an application that searches for a process matching a certain pattern. On Linux and MacOS, you would use `ps aux` to see a list of all running processes. You could also use `grep -i &lt;pattern&gt; &lt;input&gt;` to search input for pattern. In order to search all running process for a given pattern you would run something like `ps aux | grep -i &lt;pattern&gt;`. That mean you take the output from `ps` and put it in the input for `grep`.
+
+Now, authentication and searching for a process may seem like completely different problems, but in reality, the way I presented them, they are leveraging the same architetural style, [Pipe and Filter!](https://docs.microsoft.com/en-us/azure/architecture/patterns/pipes-and-filters){:target=&quot;_blank&quot;}. In fact, the Pipe and Filter architecture is one of the things made the Unix family of OSes so popular. Things like this happen all over the place; two seemingly unrelated problems share a common trait that allows them to both use the same architectural style. 
+
+But none of this to say is that one architectural style is better than the other or &quot;right&quot; for this domain of problems. Two different people will come up with different architectures to solve the same problem and both of them are probably right. For example, I may want to implement authentication as I described above and you may want to implement authentication as a layered system where every service is responsible for checking the authentication itself. Both ways are completely valid, and depending on your application, one may be preferable to another.
+
+Finally, it should be noted that architectural styles are ***NOT*** exclusive. Just because you chose a Pipe and Filter architecture for authentication, that doesn't mean you can't use REST for everything else. And just because everything else in your app uses REST, that doesn't mean you can't use another completely weird style for some aspect of your service. Different problems will need to be addressed differently, and any big piece of software is really just a massive collection of different problems. And if you look at [chapter three](https://www.ics.uci.edu/~fielding/pubs/dissertation/net_arch_styles.htm){:target=&quot;_blank&quot;} of Fielding's dissertation, you will find tables that describe the trade offs between different architectures.
+
+## So how do we &quot;architect&quot;?
+In order to build a well architected solution, you need to know a few things. The first is IT infrastructure and budget. If you have a few hundred dollars, you won't be able to build an awesome microservice infrastructure on AWS. The second is understanding the overall problem you are trying to solve. This is otherwise known as understanding the business case behind the service. Another &quot;good idea&quot; is to design something to change. And the final big thing to understand is really your language and technology well. 
+
+### IT infrastructure and budget
+I know I said earlier that architecture feeds into infrastructure, and that is still true. But you may face limitations with your current infrastructure that puts some architectural ideas way out of reach. It's kind of like building an airplane; you can do it, but if you don't have a run away or a place to test it, it was just a waste of time and money. 
+
+However, today lacking IT infrastructure has been greatly reduced thanks to services like [Amazon Web Services (commonly referred to as AWS)](https://aws.amazon.com/){:target=&quot;_blank&quot;}, [Google Cloud platform](https://cloud.google.com/){:target=&quot;_blank&quot;}, [Azure](https://azure.microsoft.com/en-us/){:target=&quot;_blank&quot;}, and [Digitalocean](https://www.digitalocean.com/){:target=&quot;_blank&quot;}, but budget could still be a problem. AWS could be to expensive for smaller projects. A small client of mine was once paying thousands of dollars on to host their application because a previous developer went and built this beautiful microservices architecture that was really designed for a large team and &quot;infinite&quot; scalability. Obviously, the client could save money by switching to a less elegant but still good monolithic architecture, especially with the load they were experiencing. It's like the Rolling Stones: No, you can't always get what you want. 
+
+### Understanding the overall problem
+A great example of this comes from when I was working on LykeMe. If you don't know, LykeMe was a social media application that matched people in the same area based on shared interests. The way matches would need to work is find everyone in the area, find what they have in common, and divide it by what they don't have in common, then store these matches in a database, sorted by that result. What I did initial was have an API endpoint that would run all of the matches for a given user, and a separate on that would run all of the matches for every user. If I had 100 users, than 1 user had to match to 99 other users. I had 100s of times this many users. Of course that didn't mean I had to match 1 user to 10,000 other users, because it was only supposed to match people in the same area. My most dense area still had thousands of users though and way too many matches to perform on a single request. A single request to match one user could take a while (I think it was close to one minute, but don't quote me on that!). 
+
+Any way, that is a classic example of not understanding the problem. Had I properly understood combinations and the matching logic I would write, I probably would have designed it in such a way where the endpoints will put the matching request into a queue and have a separate queue worker would actually perform the matching. Of course I understood that it would be a computationally heavy task when I wrote it, but I didn't understand it would be *that* heavy. In retrospect, it was a boneheaded move, and a lesson well learned.
+
+It is absolutely vital to understand your problems in order to creating great applications. I can not recall how many times my &quot;beautiful&quot; architecture changed because of new information on how the application will be used. You need to build to meet the requirements of the application, otherwise, what are you building? Some aspects of the solution may be better suited as a separate system, or may absolutely needed to be separate system, just like in my example above. 
+
+### Understanding your technology
+If you google &quot;language X vs language Y&quot; you'll get millions of results that says things like &quot;Language X is better than Y because Y sucks.&quot; That is basically what the argument of why a language is better than another for many people. For example: &quot;Python is better than JavaScript because JavaScript sucks!&quot;
+
+{% include Caption.html url=&quot;/assets/img/pythonvsPHPgoogleresult.png&quot; alt=&quot;*`Python vs PHP` returns over 2 million results!*&quot; description=&quot;*`Python vs PHP` returns over 2 million results!*&quot; %}
+
+This is complete bullshit. This is something that I see most entry level engineers do as well, I have even seen some professional engineers with tons of experience engage in this kind of behavior. And to be honest, none of it matters. You can use any language or framework you want to, for whatever reason. The only two reasons to use one language over another in most applications is A) you know that language well, or B) you want to learn that language. That is it. 
+
+The reason I am saying this is because shitty code is shitty code. The worst code in C/C++ will underperform against the best code in Python. **And shitty code comes from not understanding your technologies well!** 
+
+Each language has its own strengths and weaknesses. You must design your application's architecture to strengthen your chosen language's strengths and to downplay its weaknesses. The way you would build a Node.js application is somewhat different than how you would architect a Python application. Trying to shoehorn the same exact architecture decisions that you made in Python to a Node application will honestly frustrate you. Don't do it. Learn the languages commonly accepted best practices, learn the quirks of the language, and build your solutions to unleash the language's and technologies full power. But be careful not to go overboard. 
+
+## A word on Architecture and Software engineering
+A lot of this post has been focused on really broad architecture principles. I won't blame you if you said &quot;I want to be a software engineer, not a software architect!&quot; But I firmly believe that a software engineer needs to be aware of the architecture of the system and even needs to do a little architecture at their level. Take a look at the career path of a software engineer:
+{%include Caption.html url=&quot;https://image.slidesharecdn.com/careerpaths-160311103313/95/career-paths-for-it-graduates-5-638.jpg?cb=1457692490&quot; alt=&quot;*The career path of a software engineer*&quot; description=&quot;*The career path of a software engineer*&quot; %}
+
+The architects sit at the top. They design the overall system. They decide the layout of the servers, the placement of certain servers, the way each component interacts with each other, etc. The next level guys get handed the components the software architects thought of. These guys could be lower level architects or maybe team leads. They design how the internals of their own service ought to behave. They make similar decisions to the architects, just on a much smaller scale. Again, the individual components are broken up and the tasks divvied up to the next lowest level: the software engineers. They are tasked with building the component that their manager assigned to them. They have to design an interface, build it in such a way that is manageable, build the interactions in such a way that it meets the requirements as laid out by their team lead. In other words, many of the decisions made by software engineers are the same decisions as the decision made by their team lead, which are the same decisions made by the architects, just at a smaller scale. 
+
+You may point out that software engineers focus more on design patterns. And I will agree on that, with one additional adage, I don't really see a difference between design patterns and architectural patterns. They solve many of the same problems just on different scales. Design patterns focus on solving recurring problems in software construction, while architectural patterns really solve recurring problems in software system construction. 
+
+## The close out
+If you keep architecture in mind while building anything, chances are you will build great code. Of course you still have to balance out and be careful of over engineering. As Donald Knuth said, &quot;premature optimization is the root of all evil.&quot; I should point out that this doesn't mean to ignore any and all optimizations and just do some cowboy coding. The full quote is &quot;We should forget about small efficiencies, say about 97% of the time: premature optimization is the root of all evil.&quot; Do what you can to make great code, but don't yet worry about the really obscure edge case that will cause your code to fall apart and force you to rebuild using different architectures and design patterns. If you do try to solve that edge case right away, you will spend to much time building something, and have effectively overengineered your solution, resulting in wasted time. It is a balance between designing good code, and designing overkill code. I myself am guilty of writing overkill code, even to this day. 
+
+Thanks for reading and if you have any questions, want some clarification on this post, or want to talk about architecture, feel free to contact me. You can shoot me an email to my email address listed below, or send me a message on twitter.</content><author><name></name></author><category term="Architecture" /><category term="Production code" /><category term="production" /><category term="programming like a pro" /><category term="professional" /><summary type="html">Last week, I gave a talk at Michigan State’s Spartan Hackers. The topic of the talk was building production level code. This is something I have noticed many beginner programmers struggle with from all walks of life. Computer Science graduates, Bootcampers, and self taught programmers all struggle with these concepts when they are just beginning. This was the inspiration behind this talk and I hoped to shed some light on what it takes to build professional level applications.</summary></entry><entry><title type="html">Building An Arcade Controller</title><link href="http://yoseph.tech/building-an-arcade-controller/" rel="alternate" type="text/html" title="Building An Arcade Controller" /><published>2017-10-18T20:00:00-04:00</published><updated>2017-10-18T20:00:00-04:00</updated><id>http://yoseph.tech/building-an-arcade-controller</id><content type="html" xml:base="http://yoseph.tech/building-an-arcade-controller/">Last week I wrote an [article on making a Retro Game Console]({% post_url 2017-10-11-building-a-raspberry-pi-arcade-machine %}){:target=&quot;_blank&quot;}. Wanting to take &lt;span style=&quot;text-decoration:underline&quot;&gt;Yoseph's Arcade&amp;trade;&lt;/span&gt; to the next level, this week I built a arcade controller. 
+
+This was a medium level project requiring a knowledge of power tools.
+
+When all's said and done, you should come away with a board that looks like this: 
+{% include Caption.html url=&quot;/assets/img/Aracade_panel_front.jpg&quot; alt=&quot;*The front of the arcade panel*&quot; description=&quot;*The front of the arcade panel*&quot;%}
+
+Without further ado, Let's  get started. 
+
+## Trip to Home Depot (and an Amazon order)!
+
+We need to gather some supplies from Home Depot and of course we need some arcade buttons and joysticks. I was thinking of adding a trackball, but I decided against it because I felt it would make the board to busy. 
+
+### Arcade Buttons
+For the arcade buttons, I went with [these buttons from Amazon](https://www.amazon.com/gp/product/B00WAY9848/ref=oh_aui_detailpage_o00_s00?ie=UTF8&amp;psc=1){:target=&quot;_blank&quot;}. I'm sure any arcade button set on Amazon would work, but I chose this one in particular because a) it lights up, and b) it has a relatively high rating with plenty of reviews. This set also comes with two USB encoders and two different colored buttons and joysticks, so you can play with two people. I also bought [these other buttons](https://www.amazon.com/Easyget-Illuminated-Button-Buttons-Fighting/dp/B01N5Y8E2Z/ref=pd_lutyp_cxhsh_1_3?_encoding=UTF8&amp;pd_rd_i=B01N5Y8E2Z&amp;pd_rd_r=7TF09SJY18KTQ5E9J3Q3&amp;pd_rd_w=nLpDs&amp;pd_rd_wg=HwwGP&amp;psc=1&amp;refRID=7TF09SJY18KTQ5E9J3Q3){:target=&quot;_blank&quot;} for no other reason except it says coin and has player icons. I actually did not use these buttons in this project, though I may add them later. 
+
+### Drill bit sizes
+Arcade buttons come primarily in two sizes: 30mm and 24mm, and both of these kits use that size. In the USA, where I live, it is extremely difficult to find those exact size drill bits to use to cut the holes out. The next best thing is to get drill bits that approximate the proper sizes. For the 30mm holes, I used a 1 1/8'' hole saw, and for the 24mm, I used a 15/16'' spade tip drill bit. The 1 1/8 inch drill bit was the perfect size even though the box said that it cuts a 29mm hole. The 15/16 drill bit was good too, but it was a little small. I tried a one inch spade tip (on a test board) and that was a little too big for the 24mm buttons. I honestly felt as though I could accidently punch the buttons through the hole. So instead of sticking with the one inch holes, I used the 15/16 spade tip and I used some sandpaper to make the buttons fit. After a light sanding (I went around the hole maybe 4-6 times), the 24mm buttons fit, though they are snugger than the 30mm holes. 
+
+If you can find a 23 or 24 mm spade tip, hole saw, forstner, or other bit to drill clean holes, definitely use those. If you can't find those, you can use the 15/16 inch bit and just sand a bit. 
+
+### Wood
+This is an important piece of the of the board. It is what is holding your buttons after all!
+
+For this, I used [this Medium Density Fiberboard](http://www.homedepot.com/p/1-2-in-x-2-ft-x-4ft-Medium-Density-Fiberboard-1508108/202089097){:target=&quot;_blank&quot;} from the home depot for $11. The 4ft X 8ft board is $15 so if you want that, you can go for it, but I have _plenty_ of wood left over from the 2ft X 4ft board. 
+
+I picked 1/2 inch MDF board because it wasn't as flimsy as the 1/4 inch board; I couldn't just take thee wood and flex it. I thought it felt more sturdy. I also picked fiberboard because it is easier to paint and when you cut or drill, it leaves cleaner edges than plywood. You should also be careful when cutting or drilling this wood as it contains some pretty nasty chemicals. Definitely cut this outside, with a saw that has a vacuum attached, or use one of those dust masks.
+
+{% include Caption.html url=&quot;https://www.envirosafetyproducts.com/media/catalog/product/3/0/3070-3MM8210Plus.jpg&quot; alt=&quot;*A Dust Mask*&quot; description=&quot;*A Dust Mask*&quot;%}
+
+### Some Miscellaneous items
+In order to mount my joysticks, I grabbed a eight of countersunk M8 X 25mm Machine screws with 8 M8 nylon lock bolts. I only grabbed the Lock bolts because those were the first bolts I saw that would work. I also grabbed some finishing nails (the nails with the smaller heads) and small screws to mount the the USB encoders. 
+
+## Let's Actually Start Building
+I drew my insperation from the [X-Arcade Dual Joystick](https://shop.xgaming.com/collections/arcade-joysticks){:target=&quot;_blank&quot;}
+
+{% include Caption.html url=&quot;//cdn.shopify.com/s/files/1/0192/2714/products/dual-stick_large.png?v=1449591754&quot; alt=&quot;*The X-Arcade Dual Joystick*&quot; description=&quot;*The X-Arcade Dual Joystick*&quot;%}
+
+### First cutting the wood.
+I found [this great forum post](https://support.xgaming.com/support/solutions/articles/12000003145-what-are-the-dimensions-of-your-products-){:target=&quot;_blank&quot;} outlining their dimensions and decided to base my project off of that. I didn't do the fancy cuts and angles because I don't have easy access to a saw. So here is what I came up with:
+1. For the top piece (the piece with all the buttons), I made it 24 inches by 11 inches.
+2. for the two short sides, I made them 4 inches by 8inches.
+3. for the long sides, I made them 24 inches by 4 inches
+4. I wasn't able to cut a bottom piece (due to lack of a saw), but the bottom piece would have been 24 inches by 9 inches.
+
+{% include Caption.html url=&quot;/assets/img/wood_for_arcade.jpg&quot; alt=&quot;*The cut wood, with Barney sitting idly by.*&quot; description=&quot;*The cut wood, with Barney sitting idly by.*&quot;%}
+
+### Next step, Drilling the holes
+I wanted to get the feeling of an actual arcade machine. I figure the best way to do that was to make the board as symmetric as possible. First I made sure to draw lines right down the middle of the board, both lengthwise and widthwise. The width long line would be a starting position for player two's controller, just like the edge is the starting position for player one's controller. Then I put the line for the controller 4 inches from their respective edges (player two's edge is the center line). After that, I measured 2 and a half inches from the joysticks, for where the buttons will begin. Next I spaced the buttons out at 4 cm each. Why the sudden change to metric? If you remember, the buttons are in metric so it was easier for me to do math when the button measurements are in metric. So I drew three new lines spaced 4 cm apart. But I have 8 big buttons! So I made two rows of 3 and one row of two. 
+
+The reason I did to rows of three is because I love Street fighter and the arcade game has two rows of three. 
+{% include Caption.html url=&quot;https://r.mprd.se/MAME/cpanel/sf2.png&quot; alt=&quot;*Street fighter controller*&quot; description=&quot;*Street fighter controller*&quot;%}
+
+Next I made two lines, one above the lengthwise middle line and one below, both two centimeters from the middle line. Next, I made a line two centimeters from the bottom row and 4 centimeters from the middle button. When you are done with that step, you should have 10 places where lines intersect. 7 of those lines are where holes for the buttons and joystick will go. In the below picture, I circled where the buttons will go, and the joy stick goes where the lines intersect closest the edge.
+{% include Caption.html url=&quot;/assets/img/wood_for_arcade_measured_with_one_hole.jpg&quot; alt=&quot;*The final measured board with all the lines. I already cut a single hole here and forgot the bottom row of two.*&quot; description=&quot;*The final measured board with all the lines. I already cut a single hole here and forgot the bottom row of two.*&quot;%}
+
+All of these holes need to be 1 1/8 inch, even the one for the joystick.
+
+Next I drilled two holes in the base, both 1 and 1/8 inch. One hole is for side that will face your tv. This is where the cables for USB will run. I put this one smackdab in the middle of one of the 24 by 4 inch boards (centered at 12 inches and 2 inches). The other hole is for a button that will basically act as a select button for one of the players. I put this hole on one of the small 8 inch by 4 inch boards, so that it will be on the side. This button was put 4 inches from the back and two inches from the top. I did this so that it would be closer to the USB encoder.  
+
+The last set of holes I made were the three small 15/16 buttons at the top. I put one in the middle (12 inches from the edge), and 4cm from the other edge. I then put the other two holes 6 inches from this button (still 4cm from the edge). 
+
+### Putting the buttons and Joystick. 
+
+After all of the button holes are drilled, you put in the buttons. The buttons I linked to above have plastic bolt like screws that you use to attach them. Slip the buttons in and then tighten the screws on. It should be pretty easy to do this. 
+
+When that is done, it's time for the Joystick. Make sure you measure the base plate of the joystick well. You need to drill four small holes for the bolts in order to mount the joystick. 
+
+{% include Caption.html url=&quot;/assets/img/joystick_top_view.jpg&quot; alt=&quot;*The baseplate of the joystick*&quot; description=&quot;*The baseplate of the joystick*&quot;%}
+
+After that is all done, you should have something that looks like this: 
+{% include Caption.html url=&quot;/assets/img/arcade_panel_back.jpg&quot; alt=&quot;*The back of the arcade panel*&quot; description=&quot;*The back of the arcade panel*&quot;%}
+
+{% include Caption.html url=&quot;/assets/img/Aracade_panel_front.jpg&quot; alt=&quot;*The front of the arcade panel*&quot; description=&quot;*The front of the arcade panel*&quot;%}
+
+### Making the base
+Next up is a really simple part, making the base. Honestly all I did here was use some wood glue and hammer in some finishing nails. When you are done, you will have this: 
+{% include Caption.html url=&quot;/assets/img/bottom_panel.jpg&quot; alt=&quot;*The bottom Base, before I cut the holes*&quot; description=&quot;*The bottom Base, before I cut the holes*&quot;%}
+
+You'll notice that my base doesn't have the two holes. I took this picture before I drilled them. I don't recommend doing that :)
+
+## Saddle Up: the wiring
+We are close to the finish line now! All we really need to do is wire it up. Wiring is really easy, especially because the buttons come with wire harnesses and instructions. First I put the wire on the buttons. It's kind of hard to describe what wire goes where so here is a picture: 
+{% include Caption.html url=&quot;https://www.thegeekpub.com/wp-content/uploads/2016/07/Arcade-Control-Kit-2-Player-LED-Red-Blue-Sanwa-0009.jpg&quot; alt=&quot;*Where the wires go*&quot; description=&quot;*Where the wires go*&quot;%}
+
+After all the buttons have wires, I would connect the USB encoder. You don't have to worry where you put the buttons, because retro pie will ask you to map the inputs when you plug it in for the first time. 
+
+{% include Caption.html url=&quot;/assets/img/arcade_wired.jpg&quot; alt=&quot;*All wires added*&quot; description=&quot;*All wires added*&quot;%}
+
+As a side note: I put the middle top button on player two's encoder and the side button on player one's encoder. 
+
+## One last step!
+Finally there is one last thing and that is attaching the arcade panel to the base. you can do this before or after wiring to be honest. All you really have to do is set the top board on top of the base and nail it down. I wouldn't use screws as MDF splits easily and doesn't hold screws really well. 
+
+## And that's that!
+You now have a working arcade controller that you can use to play whatever you want. You may want to add some things, like JoyStick extenders (I did) or a paint job. But you can really do whatever you want. This is an easy project so feel free to experiment!
+
+## Extra photos
+{% include Caption.html url=&quot;/assets/img/playing_mspacman.jpg&quot; alt=&quot;*Me playing Ms. Pacman*&quot; description=&quot;*Me playing Ms. Pacman*&quot;%}
+{% include Caption.html url=&quot;/assets/img/boardLitup.jpg&quot; alt=&quot;*Board being lit up*&quot; description=&quot;*Board being lit up*&quot;%}
+{% include Caption.html url=&quot;/assets/img/full_arcade.jpg&quot; alt=&quot;*Edgy shot of the controller*&quot; description=&quot;*Edgy shot of the controller*&quot;%}
+
+As always, if you have any questions or comments, let me know either through email, or in the comments below. Next week I am giving a talk at MSU's Spartan hackers about building production code. Next week’s blog post will probably be about that!</content><author><name></name></author><category term="RetroPie" /><category term="DIY" /><category term="Retro" /><category term="Gaming" /><category term="raspberry" /><category term="pi" /><category term="mame" /><category term="retro" /><category term="arcade," /><category term="games" /><summary type="html">Last week I wrote an article on making a Retro Game Console. Wanting to take Yoseph’s Arcade™ to the next level, this week I built a arcade controller.</summary></entry><entry><title type="html">Building A Raspberry Pi Arcade Machine</title><link href="http://yoseph.tech/building-a-raspberry-pi-arcade-machine/" rel="alternate" type="text/html" title="Building A Raspberry Pi Arcade Machine" /><published>2017-10-11T16:25:55-04:00</published><updated>2017-10-11T16:25:55-04:00</updated><id>http://yoseph.tech/building-a-raspberry-pi-arcade-machine</id><content type="html" xml:base="http://yoseph.tech/building-a-raspberry-pi-arcade-machine/">A couple of weeks ago I went to [this](http://thegridoldtown.com/){:target=&quot;_blank&quot;} barcade in Lansing Michigan. Being the huge nerd that I am, I decided that I wanted to play these games all the time. 
+
+{% include Caption.html url=&quot;/assets/img/me_nerd.png&quot; alt=&quot;*Me, a complete nerd*&quot; description=&quot;*Me, a complete nerd*&quot; class=&quot;small&quot;%}
+
+The problem is, Arcade machines are expensive and I couldn't get my hands on one that day. So I did the next best thing: I found a raspberry pi I had laying around and fished out an old USB XBoX controller I had laying around and so &lt;span style=&quot;text-decoration:underline&quot;&gt;Yoseph's Arcade&amp;trade;&lt;/span&gt; was born.
+
+In this article, I will walk you through the entire process from setting up your Raspberry Pi to transforming it into a relatively cheap retro console. 
+
+## First up, the Hardware
+
+### Raspberry Pi
+
+The most obvious piece of hardware I used was a [raspberry pi](https://www.raspberrypi.org/){:target=&quot;_blank&quot;}. For those of you who don't know what a Raspberry Pi is, it is a credit card sized machine priced at an affordable $35 dollars. 
+
+{% include Caption.html url=&quot;/assets/img/RPi3.jpg&quot; alt=&quot;A Raspberry Pi 3, Image courtesy of google&quot; description=&quot;*A Raspberry Pi 3, Image courtesy of google*&quot; %}
+
+
+I used a Raspberry Pi 3 for this project, though this would probably work on a Raspberry Pi 2. I am not 100% sure about how a Raspberry Pi 1 would work, but I am deeply skeptical that it would work well. I have an RPi one set up at work to run Google's timer and that is barely responsive. If you get this working on a Rpi 1, let me know! I would love to hear about it.
+
+There are some differences between the RPi 3 and RPi 2 and RPi 1. The RPi 3 and 2 both use Microsd cards instead of the one's Regular size SD card. 
+
+{% include Caption.html url=&quot;/assets/img/MicrSDandRegSDSizeComparison.jpg&quot; alt=&quot;Micro SD compared to a Regular SD card&quot; description=&quot;*Micro SD compared to a Regular SD card*&quot; class=&quot;small&quot; %}
+
+The RPi3 boast a 1.2 GHz 64 bit Arm Processor while the Raspberry Pi 2 has a 900 MHz processor and 32 bit architecture (RPi 2 version 1.2 does have a 64 bit processor) and the Raspberry Pi 1 has a 700 MHz processor and only 512 or 256 MB RAM. 
+
+However I think the most important details to consider here are the number of USB ports and the networking capabilities. The more USB ports the device has, the more people you can play with. The Pi 2 and Pi 3 both have 4 USB ports while the Pi 1 only has two ports. While the Pi 2 and Pi 3 both have 4 USB hubs, the Pi 2 only has ethernet built onto the board, so if you want Wifi, you are going to need to buy a USB wifi adapter. The Pi 3 has a wifi chip built into the board, making it a cinch to connect to wifi. In fact this is the primary reason I went with the three over the two. 
+
+If you need to buy a Raspberry Pi, I would checkout [adafruit.com](https://www.adafruit.com){:target=&quot;_blank&quot;}. I have bought many electronics from them and they are always reliable. 
+
+[Here is a direct link to the Pi I used for my arcade](https://www.adafruit.com/product/3055?src=raspberrypi){:target=&quot;_blank&quot;}. 
+
+### SD Card
+
+This piece of hardware isn't really that important all though, it is still important enough to mention. The Raspberry Pi uses a Micro SD card (Only applicable to the Pi 2 and 3) to hold the OS and it boots from this! The SD card should be at least 4 GB, but if you go with a bigger card, you get to store more games. One thing to keep in mind is that according to [this stack exchange post](https://raspberrypi.stackexchange.com/questions/45312/is-there-any-limit-for-micro-sd-card-size-in-pi3){:target=&quot;_blank&quot;}, there is a max supported size of 32 GB, although some people have gotten larger sizes working. If 32GB isn't doing it for you, you can always use an external drive. 
+
+The SD card I used was [this](https://www.amazon.com/gp/product/B01H5ZNOYG/ref=oh_aui_detailpage_o06_s01?ie=UTF8&amp;psc=1){:target=&quot;_blank&quot;} SD card I bought a while ago with NOOBS preloaded on it. To be honest, I don't recommend this card for this application, because we are not going to be using NOOBS for anything, although it could be useful to make sure your Raspberry Pi boots correctly. You can buy a similar card for half the price, so I recommend that. 
+
+### Controllers
+
+This is the only major component that isn't strictly needed; you can use a keyboard and mouse if you wanted to, but lets be honest, you need a controller for it to &quot;feel&quot; right . The only requirement is that it needs to be a USB device. 
+
+There are a bunch of USB controllers. Searching for USB controllers on Amazon returns more than 50,000 results. So which one is right? That is entirely upto you. The controllers that I use are some cheap controllers from GameStop. Those controllers are pretty cool and cost me about $15 each. 
+
+### Miscellaneous
+
+There are some additional hardware that you will need. If you already have a computer and a phone, then chances are you already have everything you need. You'll need an HDMI cable for video and sound, USB mouse and keyboard for set up, a micro USB cable (the one that charges most android phones) and a 5.1V 2.5A power supply. 
+
+Now that you have all of the hardware, let's take a look at the software!
+
+## Now the software!
+
+### The Operating System (AKA the OS)
+
+{% include Caption.html url=&quot;https://retropie.org.uk/wp-content/uploads/2016/04/Retropie_Splash.png&quot; alt=&quot;The RetroPie Logo&quot; description=&quot;*RetroPie Logo*&quot; %}
+
+For the OS, we will be using [RetroPie](https://retropie.org.uk/){:target=&quot;_blank&quot;}. Make sure to go to [this page and download the latest version of RetroPie](https://retropie.org.uk/download/){:target=&quot;_blank&quot;}. RetroPie is a great little OS that can emulate over 50 consoles and computers including NES, SNES, PS1 and PS2. [Here is a full list of platforms it supports out of the box](https://retropie.org.uk/about/systems/){:target=&quot;_blank&quot;}. It also is built with a media center [kodi](https://kodi.tv/){:target=&quot;_blank&quot;} that will allow you to stream your own media to your TV.
+
+Before moving on I wanted to touch on a few things. The Raspberry Pi Foundation recommends installing NOOBS and officially supports an OS called Rasbian, both of which can be downloaded [here](https://www.raspberrypi.org/downloads/){:target=&quot;_blank&quot;}. NOOBS is definitely the easist way to set up a Raspberry Pi. However, for this, we aren't going to us NOOBS because the operating system we need is not on there. (*Note: [NOOBS](https://github.com/raspberrypi/noobs/){:target=&quot;_blank&quot;} is not really an OS, it is really just an Operating system installer. If you are doing any other project, I recommend using NOOBS*)
+
+I should also mention that NOOBS does ship with an OS you can install called [RecalBox](https://www.recalbox.com/){:target=&quot;_blank&quot;}, and if it doesn't anymore, it is extremely easy to set up. I did try this OS before installing RetroPie, but I didn't like it. RetroPie and RecalBox are very similar. They both are based on RetroArch and EmulationStation to provide the emulators, both have Kodi installed, and both provide online updates, rewinding, save states, and screenshots. Hell they even look the same!
+
+{% include Caption.html url=&quot;http://www.emulationstation.org/assets/featurettes/full/theming_system.png&quot; alt=&quot;RetroPie or RecalBox UI&quot; description=&quot;*Retropie or RecalBox? You honestly can not tell!*&quot; %}
+
+However, RetroPie offers much more control over the system. You can change it's splash screen, what version of Linux it runs (it runs Rasbian by default) and tinker with every single setting. I routinely SSH into my RetroPie to monkey around with stuff (not that I would recommend this, unless you know what you are doing). This may seem extremely overwhelming, but RetroPie provides [excellent and extensive documentation](https://retropie.org.uk/docs/){:target=&quot;_blank&quot;}, while RecalBox does not. 
+
+After you download RetroPie, you'll need to unzip the fill using 7zip. You'll be left the the img which is the actual OS. 
+
+### A SD card writer
+
+This is really a simple step to just set up the SD Card to install the OS. I used [this program called Etcher](https://etcher.io/){:target=&quot;_blank&quot;} to burn the iso to an SD card. If you really want to, you can use dd if your are running MacOS or Linux, although I won't give any instruction on this because I can not remember the flags. 
+
+{% include Caption.html url=&quot;https://imgs.xkcd.com/comics/tar.png&quot; alt=&quot;relevant XKCD&quot; description=&quot;*There really* is *a relevant XKCD for everything*&quot; %}
+
+### ROMs, ROMs, and more ROMs!
+
+In order to actually play the games, you'll need [ROMs](https://en.wikipedia.org/wiki/ROM_image){:target=&quot;_blank&quot;}. Each game will have a ROM associated with it. However, I must point out that it is illegal to download the ROMs of games you don't legally own. Finding the ROMs of games you legally own is really easy. You just google your game title and add ROM after it. If the game was added for multiple consoles, you may want to also specify which console you are looking for. 
+
+{% include Caption.html url=&quot;/assets/img/googleSearch.png&quot; alt=&quot;Finding the ROM for Super Mario Bros&quot; description=&quot;*Finding the ROM for Super Mario Bros*&quot; %}
+
+This step could be a bit sketchy, so just remember to exercise caution and not to run any of these programs on your actual machine unless you thoroughly inspect the file. 
+
+### A program to transfer files to the Raspberry Pi
+
+If you own a Mac or windows, you can use Finder or Explorer (respectively). On Linux, I just use good old SFTP and SSH to manage everything.
+
+## Now lets put everything together!
+
+So now that all of the hardware has been gathered and all of the required software has been downloaded, we can actually begin building our Arcade!
+
+The first step is to double check that the RetroPie file you downloaded earlier is a `.img` file. If the extension is `.img` you're good to go. But if it is `.7z` or `.zip` you need to extract the file. I think RetroPie only allows you to download `.7z` files. To uncompress `.7z` files, you'll need [7-zip](http://www.7-zip.org/){:target=&quot;_blank&quot;} (for windows) or [the unarchiver](https://theunarchiver.com/){:target=&quot;_blank&quot;} if you're using a Mac.
+
+Now that you are absolutely sure that RetroPie is good to go, lets &quot;burn&quot; the image to the SD card. Burning the image is a process where the target disk (in this case your SD card) gets an exact copy of the `.img` file. The `.img` file itself is an &quot;image&quot; (think of it like taking a picture, the picture is frozen in time.) of what a hard drive of a device running the image would look like. You can't simply copy the files to the SD card (unless you are using NOOBS or something similar) because it doesn't make the card an exact copy of the image. Computers, and indeed the Raspberry Pi, need this exact copy so that it can find the code that allows it to boot properly. Burning with Etcher is an extremely easy process:
+1. Make sure that the SD card is completely free of junk. Download [The SD card association's memory card format](https://www.sdcard.org/downloads/formatter_4/){:target=&quot;_blank&quot;} if you are on Windows or Mac, or simply use gparted on linux. Set up the SD card as FAT and press go. Let it work on that and then move on. 
+2. Next we fire up Etcher. It's pretty easy to use Etcher. First you need to select the image you want to burn (which should be something like retropie-4.3-rpi2_rpi3.img. This will be different depending on the RetroPie version and which Raspberry Pi version you downloaded this for). Next you select the drive you want to burn the Image to (this is the SD card). Finally, just press Flash and wait for Etcher to do it's magic! When Etcher says it has finished, make sure that you eject the disk before removing it, you don't want to accidentally corrupt the card because then you'll have to redo these steps.
+
+After you are finished burning the image to the SD card, it is time to power up the Raspberry Pi! Firs what I would do is plug in the SD card. The SD card goes in the end opposite the USB ports. There is a little metal peice under the board that the card slides into with the pins facing the board.
+
+{% include Caption.html url=&quot;https://sailoog.gitbooks.io/openplotter-documentation/content/en/boot1.png&quot; alt=&quot;You put the SD card here, under the board and opposite the USB ports&quot; description=&quot;*Here is where the SD card goes into*&quot; %}
+
+Next, plug in the HDMI cable to both your TV and Raspberry Pi, and turn on your TV. Next plug in your controller and mouse and keyboard. Finally just plug in the Micro USB cord into the Pi and the USB into your 5.1V 2.5A power supply and plug it into the wall. 
+
+{% include Caption.html url=&quot;http://habrastorage.org/storage2/fb7/5b5/1da/fb75b51da92335e0ae9b11d660621b66.jpg&quot; alt=&quot;Raspberry Pi Boot Screen&quot; description=&quot;*If all goes well you should be greeted by this screen*&quot; %}
+
+That screen will quickly be followed by a wall of scrolling text. Don't fear! That is the actual Operating System booting up. 
+
+{% include Caption.html url=&quot;https://i.kinja-img.com/gawker-media/image/upload/s--RFjS-T6S--/c_fill,fl_progressive,g_center,h_450,q_80,w_800/dfzybkr8hbtaqmvdfkus.png&quot; alt=&quot;Rasbian Boot and Login Sequence&quot; description=&quot;*Rasbian booting up!*&quot; %}
+
+Finally, when that is done, you'll see the splash screen of RetroPie and then finally nothing but a RetroPie entry in some sort of menu. On initial boot, RetroPie will detect your controller and ask you to configure it. 
+
+{% include Caption.html url=&quot;https://cdn.instructables.com/FBU/VUT7/J5Y81XXG/FBUVUT7J5Y81XXG.MEDIUM.jpg&quot; alt=&quot;Configure your controller&quot; description=&quot;*Configure your controller*&quot; %}
+
+Press any button to continue. RetroPie will ask you to press the buttons on the controller so that it can recognize this. If you mess up, you can always come back and reconfigure if you want to. You can also use the mouse and keyboard to navigate, all though RetroPie will automatically go to the next entry.
+
+With your controller in hand, simply select the RetroPie option (at this point it should be the only entry on the screen) and you should see this screen: 
+{% include Caption.html url=&quot;https://cloud.githubusercontent.com/assets/10035308/9141387/7ed23ec0-3cf5-11e5-9944-a8f7870cc6c0.png&quot; alt=&quot;RetroPie Setup Menu&quot; description=&quot;*RetroPie Setup Menu*&quot; %}
+
+Select configure Wifi. The next screen to be brought up isn't exactly the prettiest, but it gets the job done.
+{% include Caption.html url=&quot;https://cloud.githubusercontent.com/assets/10035308/9141521/96ceb142-3cf6-11e5-9ba4-2b23a8b52480.png&quot; alt=&quot;Wifi Screen&quot; description=&quot;*WiFi Screen*&quot; %}
+
+Go ahead and select your WiFi and enter your password using the keyboard.
+
+### With that done, you are now officially ready to start playing some games!
+
+Now there are several ways to get games to the RetroPie, from [using a USB drive](https://github.com/retropie/retropie-setup/wiki/Transferring-Roms#usb-stick){:target=&quot;_blank&quot;}, to [manually using a USB drive](https://github.com/retropie/retropie-setup/wiki/Transferring-Roms#manually-copy-files-from-usb-stick){:target=&quot;_blank&quot;}. The method I am going to focus on is using Samba. 
+
+Samba is a program that allows you to access a computer's files over a network. To access your RetroPie's Samba Shares
+open up Explorer on Windows or Finder on MacOSX. In Explorer, in the address bar at the top, type `\\RETROPIE` and in Finder, click on `Go -&gt; Connect to Server` then type in `smb://retropie` and hit connect. If you are prompted for a password, it will be raspberry unless you changed it. I don't think RetroPie actually puts a password on Samba. 
+
+If you did that correctly, you should be connected and see a few directories.
+
+{% include Caption.html url=&quot;https://cloud.githubusercontent.com/assets/10035308/12865893/d2eab264-cc77-11e5-9ec6-003e13322a5a.png&quot; alt=&quot;Connected and ready to upload ROMs&quot; description=&quot;*Connected and ready to upload ROMs*&quot; %}
+
+Now in the ROMs directory, there are several other directories. These directories correspond to the systems the ROMs inside can emulate. For example the `nes/` directory is for NES games, the `snes/` directory is for SNES games, so on and so forth. Just put your ROM in the right folder, reboot the Pi, and you should be good to go!
+
+#### **Note about MAME games**:
+
+[MAME](http://mamedev.org/){:target=&quot;_blank&quot;} is an emulator that emulates ***many*** arcade machines. This is what you want to use if want to play Donkey Kong, Ms. Pac Man, Galaga, etc. (But only if you own it, right?) However, MAME has different ROM sets and not every single game is supported through this system. [RetroPie recommends using lr-mame2003 and lr-fbalpha](https://github.com/RetroPie/RetroPie-Setup/wiki/Arcade){:target=&quot;_blank&quot;} but also has [these MAME emulators](https://github.com/retropie/retropie-setup/wiki/MAME){:target=&quot;_blank&quot;}. Most of my MAME games are using lr-mame2003, So I know those work.
+
+One thing to make sure of is that you ***absolutely, positively*** put the ROMs in the right directory. For any of my MAME games to work, I have to put them in the MAME directory which has a bunch of other directories (`cfg/` is the first one I can think of). These directories are important because these are what emulates the machine so that the ROM runs correctly. You should also be able to put them in the `arcade/` directory which has sub directories like `lr-mame2003/` which has the proper directories to run the ROMs. If that still doesn't work, try to configure it to run a different emulator when you run the ROM. If that still doesn't work, move the ROM around until it works. 
+
+[There is also this list of compatable ROMS](https://docs.google.com/spreadsheets/d/1antILt7D12EWOFzyJwTfB86NceghMJKXG7CdYumuHec/edit#gid=0){:target=&quot;_blank&quot;}
+
+## The wrap up
+
+That is really all there is to it! You're now ready to play some retro games, but there may be somethings you may want to change, for a total price of $73:
+1. Raspberry Pi: $35
+2. 2 controllers: $30 ($15 each) 
+3. 16 GB SD card: $8
+
+Compared to a similar console that is [$180.55 at walmart](https://www.walmart.com/ip/800-Games-in-1-Pandora-s-Box-4s-Multiplayer-Home-Arcade-Console-Double-Joystick-Kit/166621177?wmlspartner=wlpa&amp;selectedSellerId=10610&amp;adid=22222222227102190842&amp;wmlspartner=wmtlabs&amp;wl0=&amp;wl1=g&amp;wl2=c&amp;wl3=218293539805&amp;wl4=pla-354654641996&amp;wl5=9016944&amp;wl6=&amp;wl7=&amp;wl8=&amp;wl9=pla&amp;wl10=117027497&amp;wl11=online&amp;wl12=166621177&amp;wl13=&amp;veh=sem){:target=&quot;_blank&quot;}, I'd say it is a good deal :)
+
+
+I think the the only thing I changed, was that I made it so that the Joy Stick acted as the D-Pad. I did this because some games, like Ms. Pac Man, is a bit hard to play with the D-Pad. To do this, just go to the config screen and select `RetroArch configuration`, then select `settings -&gt; Input -&gt; Input User Binds 1` then look for the option that says `Analog D-pad mode` user the D-Pad to select whether you want the left or right analog stick to be mimick the D-Pad. Then go back to the initial screen, then go to configuration and make sure you save this change. Then go back to RetroPie and you'll be able to use your analog stick as a D-pad making arcade games much easier!
+
+## Going forward
+
+Going forward, I think I'm slowly going to build out an Arcade Cabinet. I say slowly because, A) I don't have the tools to build it (but my girlfriend's father does), and B) my girlfriend isn't that thrilled about having an Arcade cabinet in our apartment. 
+
+This weekend, I am going to build a control panel to mimic an Arcade Cabinet's controls for two players. I'll write a blog post on that next week. After that, I am going to try to salvage a screen somewhere that mimics an arcade screen but not a real one because those are expensive.
+
+If you have any questions, or have any feedback, drop a comment below or shout me an email. Thanks!</content><author><name></name></author><category term="raspberry pi" /><category term="mame" /><category term="retro" /><category term="arcade" /><category term="games" /><category term="RetroPie" /><summary type="html">A couple of weeks ago I went to this barcade in Lansing Michigan. Being the huge nerd that I am, I decided that I wanted to play these games all the time.</summary></entry><entry><title type="html">Relaunching My Blog</title><link href="http://yoseph.tech/relaunching-my-blog/" rel="alternate" type="text/html" title="Relaunching My Blog" /><published>2017-10-11T12:47:26-04:00</published><updated>2017-10-11T12:47:26-04:00</updated><id>http://yoseph.tech/relaunching-my-blog</id><content type="html" xml:base="http://yoseph.tech/relaunching-my-blog/">Today, I am proud to anounce the launch of my new website and blog, yoseph.tech! I just wanted to take the time out and really introduce myself and explain the motivations behind this blog.
+
+## So who am I?
+
+My name is, as you already probably guessed, is Yoseph. I am a software engineer and entreprenuer based out of Detroit Michigan, but originally from Queens, New York. I love technology and businesses. I currently work for the startup SPLT in Detroit primarily focusing on frontend development.
+
+My passions are really building great products and great businesses. I launched two businesses while in college, both of which taught me a lot. While both failed for different reasons, I discovered many great ways not to run a business as well as many great ways to build a product. I took both companies from a thought to launch. While I can't claim a successful exit, the experiences I gained were invaluable. 
+
+### Enter LykeMe
+
+![LykeMe Logo]({{ &quot;/assets/img/lykeme.png&quot; | absolute_url }})
+When I was in college, my friend and I started what was my first startup, LykeMe. I was, and still am immensely proud of the work we did. I was primarily responsible for the tech team which I grew to five people at its peak. We took that platform from 0 to about 20,000 users in just a couple of months, got interviewed and featured in many publications including USA today, Inside Higher Ed, and Cosmopolitan magazine. It was great to see people using a product that I created.
+
+Of course, there where many problems along the way. I learned so much about deploying production infrastructure and how important proper coding standards are, especially on any team greater than yourself. Because of my naitevity we had inital problems scaling, building the product, and solicitating user feedback. Building LykeMe really tought me a lot about engineering and how to really think about problems. This was the project that trully set me on the path I am on today.
+
+### Then there was Shuttl
+
+After LykeMe, I moved on and worked on ShuttlCMS, the CMS system that would have killed wordpress. While I didn't do nearly as well with ShuttlCMS as I did with LykeMe, I think the lessons I learned here were much more important to an aspiring entrepreneur than the Lessons I learned at LykeMe. I built this great product that functioned well and people were really interested in. I thought I had a target market and I thought they were willing to pay and use ShuttlCMS. 
+
+*But I was wrong.*
+
+Now that I look back and reflect on why Shuttl failed, It should have been obvious from the get go. Our market was freelancers and contract shops building websites for clients. ShuttlCMS generated static websites for thier client websites, making them both faster and more secure than a website hosted on something lilke Wordpress. When I actually spoke to our market, I realized none of that mattered to them. They only cared about keeping their clients happy and building websites as fast as they could. Training on a new system would be a tedious and time consuming process that would fly in the face of both of those needs. 
+
+Lesson Learned: Always make sure you understand your customers' needs.
+
+(The ultimate irony is that I am using Jekyll to maintain this site. Also, if you are curious or want to use ShuttlCMS, the code for ShuttlCMS can be found [here](https://github.com/shuttl-io/shuttl){:target=&quot;_blank&quot;}).
+
+### So What am I doing now?
+
+Now I am working in Detroit. I am a member of the 2017 HackerFellows program and a software engineer at SPLT. I am trying to learn and meet as much as I can in order to become a better entrepreneur. I find the atmosphere in Detroit electrifying. There is so many great people and startups in the Entrepreneurial community here. 
+
+## Motivation for this website
+
+Before I end the first post on my new site, I wanted to breifly speak about the motivations behind my website. 
+
+Primarily, I simply wanted a creative outlet. This website is meant to be a place where I can write down my musings regarding technology, business, and entrepreneurship.
+
+Secondly, I really wanted a place to practice my SEO abilities and content marketing skills, and what better product to market than myself ;)
+
+Finally, I want to get better at writing. I want to be able to clearly and efectively get my message across.
+
+Thanks for reading my first post and I hope you stick around for more!</content><author><name></name></author><category term="blog" /><category term="writting" /><category term="updates" /><category term="life" /><summary type="html">Today, I am proud to anounce the launch of my new website and blog, yoseph.tech! I just wanted to take the time out and really introduce myself and explain the motivations behind this blog.</summary></entry><entry><title type="html">Experiences with .NET Core</title><link href="http://yoseph.tech/experiences-with-dotnet-core/" rel="alternate" type="text/html" title="Experiences with .NET Core" /><published>2017-02-09T10:00:00-05:00</published><updated>2017-02-09T10:00:00-05:00</updated><id>http://yoseph.tech/experiences-with-dotnet-core</id><content type="html" xml:base="http://yoseph.tech/experiences-with-dotnet-core/">For the past three weeks, I have been using .NET Core. Before this, I have had about 4–5 years experience building applications in ASP.NET and writing Unity3D games in C# for about the same out of time. Although it wouldn’t be my first choice for a project, that honor goes to Python, I actually enjoy using C#.
+
+Up until this point, ASP.NET was for windows development only. True, C# was available for on Linux and Mac OSX through various technologies, like Mono or Unity3D (Unity on my Mac is what introduced me to C# actually). But anyone who has used those technologies can probably attest that these technologies weren’t as good as their Microsoft counterparts. So when I heard about Microsoft’s intent to open source .NET Core and make it cross platform, I pledged to try it.
+
+Fast forward a year, I have finally decided to try .NET Core. I’ll admit I was excited. None of the computers I own are Windows machines, although my work machine has a Windows 7 VM. So I set about installing .NET on my on Linux Mint laptop, My Macbook Pro, and my iMac. Surprisingly, the Linux install was the smoothest install in the bunch. I ran the commands and it just worked. On Mac, however, there was one extra step you have to run, which is outlined in Known Problems under Users of zsh, though that could be because of I am using Mac OSX 10.10.
+
+After getting everything installed, I obviously started playing around with the technology. It was decent. Out of the box, they give you plenty of commands to get started quickly. I didn’t like the way they laid out a web project, but again, I prefer Flask for my web development needs. I felt that the base project was too large and bloated, which is an obvious concussion if you ever used and enjoyed Flask. I don’t like how opaque passing data from the view to the controller was, and how ASP.NET selected the Template file. I like explicitly passing parameters to a function. It just makes me feel like I have more control. These annoyances are nothing compared to the other issues I faced, however.
+
+The next problem I faced was how to add a library to the project, AKA linking a library to the project. The documentation on this is lacking to say the least. Most .NET packages will tell you to install packages via NuGet. However, NuGet doesn’t work very well with .NET Core. Firstly, it throws up packages that you install via nuget install into your current directory, causing a nightmare for git. I actually had to close a teammate’s Pull Request because he mistakenly ran NuGet several times. In order to install a package, you must put the package and version in the dependencies section of your project.json and then run dotnet restore,which actually uses NuGet under the hood. Nowhere does the documentation make this readily apparent.
+
+With that sorted, I moved on to attempting to share a library that my team built to facilitate a micro-services architecture we are developing. This library is basically our data access layer for our various services. Words can not convey how frustrating this process was. You can not just build your project as a library, share the build and then pass a flag to link the library like you can in C/C++. Or at least the documentation doesn’t describe a way to do this. In order to achieve this, you must build your library as a NuGet package, deploy the package to a NuGet server, and then follow the same process as any other package. Usually, you could simply have a local directory with NuGet packages in it and point NuGet’s sources to the directory. But this package needed to be shared with my team across multiple computers (I myself have 4 computers that I cycle between), and this package couldn’t be public. So I decided to roll our own NuGet Server. I used this Simple-Nuget-Server, which came with its own can of worms. With that done, I just had to point the NuGet sources to the server, which was the easiest part of the process.
+
+When I had all of these systems in place, I decided to tackle Continuous integration for our project. Initially, this was simple to do. I just wrote makefiles to get everything automated on all of our computers and just invoked those in our continuous integration scripts. This worked fine, until Monday. To set the stage, I must disclose that we are using GitLab (self hosted, thank god) and the built in GitLab CI tools. The CI runner we are using is based off of docker so that we get a clean environment for our builds. The docker image that we used was microsoft/dotnet:latest. I mistakenly believed that Microsoft wouldn’t release a change that breaks the underlying build system of .NET. But alas, they did. On Monday, they released a new Docker Image that removed support for project.json and replaced it with MSBuild, which depends on .csproj files. This of course was an easy fix. I simply changed the image back and that was that. The infuriating part is that they decided to scrap project.json and move back to the .csproj files, which existed before .NET core. Which, many would tell me isn’t that big of a deal.
+
+But what infuriates me is this reliance on these settings file. Don’t get me wrong, I love files that hold my settings or automate building. All of my deployed Python apps rely on an ini file to initialize the WSGI server, all of my C++ projects have a makefile that hold all of the commands I need. In a way, I rely on these build systems and settings files. But what the major difference between make files or ini files and project.json files is that they aren’t needed. The ini files I use for my wsgi apps are simply stand-ins for arguments for command line arguments. For example I can replace this wsgi invocation: wsgi -protocol=http -port=5000 -workers=22 -listen=0.0.0.0 -vacuum=true with wsgi -ini=settings.ini. I’ll be honest, I’m not even certain that the first invocation of wsgi is valid because I use the second one so often. It is very similar to my C++ files.
+
+The reliance on those files honestly make the .NET Core Command Line Interface feel hacked together. It is almost like Microsoft took the build system from Visual Studio and simply wrapped it in a command line interface. This is especially true now that they are moving back to .csproj files. In fact the reason they gave for the change is because they want to make it easier to port existing .NET projects to .NET core. This isn’t helped by the fact that there is little to no documentation from Microsoft on how to do a lot of operations through the command line interface. Most of the documentation explains how to perform the action through the Visual Studio Interface, which I don’t have access to on Linux, and it doesn’t work on my Mac computers. And the documentation that describes what you need to do, doesn’t feel very complete.
+
+.NET Core is definitely not as mature as many other platforms out there. Core is in this weird limbo where it has a very mature community and a good echo system but it doesn’t feel like it is mature because of this transition to Mac and Linux. It feels like Microsoft moved this platform to a new paradigm without properly adjusting to this new paradigm. Perhaps I expected to much from a language that is not even out of beta yet (all though I believe that they are testing rc4), but it really feels like a Windows product on a Unix system, which is less than ideal.
+
+Despite its numerous kinks, Core is still a cool platform. It has potential to be a pleasure to develop with. In my opinion, the biggest issue is the lackluster documentation, although that is a problem for Microsoft in general. I think with better documentation and nicer to work with command line tools for Unix, Core has great potential to be a great platform. I look forward to see where Core goes.</content><author><name></name></author><category term=".NET" /><category term=".NET CORE" /><category term="C#" /><category term="Web" /><category term="Technology" /><summary type="html">For the past three weeks, I have been using .NET Core. Before this, I have had about 4–5 years experience building applications in ASP.NET and writing Unity3D games in C# for about the same out of time. Although it wouldn’t be my first choice for a project, that honor goes to Python, I actually enjoy using C#.</summary></entry></feed>
