@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Completely Useless Fun Project: Building The Parser - Yoseph.TECH | All things Tech</title>
+	<meta name="description" content="Last week, we learned about the history of the compiler and about the lexer. This week we are talking about parsing.">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!-- OG tags -->
+	<meta property="og:image" content="/assets/img/parser.png"/>
+	<meta property="og:title" content="Completely Useless Fun Project: Building The Parser - Yoseph.TECH | All things Tech" />
+	<meta property='og:description' content='Last week, we learned about the history of the compiler and about the lexer. This week we are talking about parsing.'/>
+	<meta property="og:type" content="article" />
+	<meta property='og:url' content='/completely-useless-fun-project-building-the-parser/' />
+
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#d25469">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#d25469">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  
+<header class="main_header">
+  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
+  <nav class="main_menu">
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+</header> <!-- End Section Header -->
+
+<main class="post_content">
+  <article class="post">
+    <header>
+      <div class="post_image">
+        <img src=/assets/img/parser.png alt="Completely Useless Fun Project: Building The Parser">
+      </div>
+      <div class="post_description">
+        <p class="post_meta">2017, Nov 18</p>
+        <h1 class="post_title">Completely Useless Fun Project: Building The Parser</h1>
+      </div>
+    </header> <!-- End Header -->
+
+    <div class="entry_content">
+      <p>It’s been awhile but I’m ready to get back into it. I was traveling pretty extensively for thanksgiving and didn’t have that much time in front of my computer. I hope everyone had a great thanksgiving!</p>
+
+<p>Anyway, <a href="/completely-useless-fun-project-parts-of-the-compiler/" target="_blank">we already spoke about the history, design and implementing a lexer.</a>. This post is going to focus on building the parser.</p>
+
+<p>Lexing, as we gathered a few weeks ago, is the lexical analysis part of the compiler. This is the process of deciding what each stream of characters mean. Are these characters some number? Are they a reserved keyword? Are the a variable name? The lexer will determine this.</p>
+
+<p>The next part of the compiler, is syntactic analysis. This is what the parser does, analyze the syntax of your language. This is different than analyzing the semantics of your language, however, and that is what we will talk about next time.</p>
+
+<h2 id="parsing-a-language">Parsing a language</h2>
+<p>In order to parse a language, you must first take into account grammar. Grammar is the set of rules that make up valid statements (often referred to as the alphabet) in a language. This is how a compiler knows that <code class="highlighter-rouge">1 + 1</code> is valid, while knowing <code class="highlighter-rouge">1 + + 1</code> is not. It is important to know that a grammar does not know the meaning of a string, only the form it may take. The job of determining the meaning of the string comes from semantic parsing, which we will cover next week.</p>
+
+<p>There are many different types of grammars, defined by noted linguist <a href="https://chomsky.info/bios/" target="_blank">Noam Chomsky</a>. These include regular, context-free, context-sensitive, and recursively enumerable. We actually spoke a little bit about regular grammars. Regular grammars are what powers Regular Expressions!</p>
+
+<figure>
+  <img src="https://www.tutorialspoint.com/automata_theory/images/containment_of_type3_type2_type1_type0.jpg" alt="*Chomsky's Hierarchy of Grammars*" class="" />
+  <figcaption><p><em>Chomsky’s Hierarchy of Grammars</em></p>
+</figcaption>
+</figure>
+
+<p>You may be wondering why we can’t use regular expression as our parser for building the entire programming language. The answer is not that simple. For simple languages a regular grammar may be good enough. But for more complex languages, regular grammars are hard to work with. This is because Regular grammars are either right-left or left-right (aka linear) whereas a grammar like context-free (which is what we will use to build Arbor’s parser) can basically be any combination of symbols.</p>
+
+<h3 id="context-free-grammars">Context Free Grammars</h3>
+<p>Context Free Grammars are the backbone of parsing a language. A Context Free Grammar is a set of production rules that describe all possible strings in a given language. These production rules are simple replacements and take the form <code class="highlighter-rouge">B -&gt; ß</code>. This rule means that when you encounter a <code class="highlighter-rouge">B</code> replace it with a <code class="highlighter-rouge">ß</code>.</p>
+
+<p>You can make a whole bunch of rules for a Context-Free-Grammar (CFG). The beauty of it is that these can literally go on for ever. Take the following Grammar for example:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>A -&gt; aA
+A -&gt; a
+B -&gt; b
+B -&gt; bB
+S -&gt; AB
+</code></pre>
+</div>
+
+<p>This languages could take any string with all <code class="highlighter-rouge">a</code>s first and all <code class="highlighter-rouge">b</code>s last. This takes <code class="highlighter-rouge">abbbbbbbbbbbbbbbbbbbbbbbbbb</code> as well as <code class="highlighter-rouge">aaaaaaaaaaaaabbbbbbbbbb</code>. When the parser encounters an <code class="highlighter-rouge">a</code> it replaces it with an <code class="highlighter-rouge">A</code>, so now a string like <code class="highlighter-rouge">aaabbb</code> becomes <code class="highlighter-rouge">aaAbbb</code>. Next it sees <code class="highlighter-rouge">aA</code> and replaces that with <code class="highlighter-rouge">A</code> so the string becomes <code class="highlighter-rouge">aAbbb</code>. This is performed one more time so that it becomes <code class="highlighter-rouge">Abbb</code>. Then, we do the same thing to the <code class="highlighter-rouge">b</code>s: <code class="highlighter-rouge">Abbb</code> -&gt; <code class="highlighter-rouge">AbbB</code> -&gt; <code class="highlighter-rouge">AbB</code> -&gt; <code class="highlighter-rouge">AB</code>. Next we recognize that <code class="highlighter-rouge">AB</code> can be reduced to <code class="highlighter-rouge">S</code> and so <code class="highlighter-rouge">AB</code> becomes <code class="highlighter-rouge">S</code>. And <code class="highlighter-rouge">S</code> is our starting symbol and so we are done.</p>
+
+<p>Using this, we can define a simple grammar that can perform any arithmetic operation:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>S -&gt; math
+math -&gt; math '+' math
+math -&gt; math '-' math
+math -&gt; math '*' math
+math -&gt; math '/' math
+math -&gt; NUMBER
+</code></pre>
+</div>
+
+<p>So here we define <code class="highlighter-rouge">NUMBER</code> as any number, integer, or float. It is in all caps to show that it is not a grammar rule (non-terminal symbol), but a terminal symbol. A Non-Terminal Symbol is a symbol that can be reduced into a form that is a group of terminal symbols. Terminal symbols are the building blocks of the language. These are the lexemes you defined in the lexer. <a href="https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols" target="_blank">In other words, non-terminal symbols can be reduced to other symbols, either terminal or otherwise, while terminal symbols can not</a>.</p>
+
+<p>In our grammar, <code class="highlighter-rouge">NUMBER</code> is the end of the road. We can’t reduce it to anything else. <code class="highlighter-rouge">1</code> is <code class="highlighter-rouge">1</code>. It won’t become <code class="highlighter-rouge">math</code>.</p>
+
+<p>Now is this grammar valid? A simple test says yes: <code class="highlighter-rouge">1 + 2 * 3 - 8 + 66 / 3 * 4</code> is valid as well as <code class="highlighter-rouge">1 + 2</code>. Let’s see why, using <code class="highlighter-rouge">1 + 2 * 3 - 8 + 66 / 3 * 4</code> as an example.</p>
+
+<p>If we run <code class="highlighter-rouge">1 + 2 * 3 - 8 + 66 / 3 * 4</code> through our lexer, the string becomes <code class="highlighter-rouge">NUMBER + NUMBER * NUMBER - NUMBER + NUMBER / NUMBER * NUMBER</code>. One of our rules says that <code class="highlighter-rouge">math</code> can become a <code class="highlighter-rouge">NUMBER</code> so there we go. The parser turns the string into <code class="highlighter-rouge">math + math * math - math + math / math * math</code>. Then the arithmetic rules come into play: we can reduce <code class="highlighter-rouge">math + math</code> to <code class="highlighter-rouge">math</code>, so <code class="highlighter-rouge">math + math * math - math + math / math * math</code> becomes <code class="highlighter-rouge">math * math - math + math / math * math</code>. We can do that for every rule in that string: <code class="highlighter-rouge">math * math - math + math / math * math</code> -&gt; <code class="highlighter-rouge">math - math + math / math * math</code> -&gt; <code class="highlighter-rouge">math + math / math * math</code> -&gt; <code class="highlighter-rouge">math / math * math</code> -&gt; <code class="highlighter-rouge">math * math</code> -&gt; <code class="highlighter-rouge">math</code>. And we are done. That was a valid string.</p>
+
+<p>Of course none of this really helps because it looks like you are actually losing data, which is sort of true. But the tools that we will use actually makes it easy to maintain the structure of the program, which I will talk about next week when talking about the Abstract Syntax Tree.</p>
+
+<h2 id="types-of-cfg-parsers">Types of CFG Parsers</h2>
+
+<p>There are are few different types of CFG parsers; General Parsers, Top Down parser, and Bottom up Parsers.</p>
+
+<p>General parsers can parse any GFG, but they are incredibly inefficient for production use, so I will not say much more about them.</p>
+
+<p>Top down parsers start at the start symbol (<code class="highlighter-rouge">S</code> in my math example above) and moves towards the leaves (or terminal symbols)</p>
+
+<p>Bottom Up Parsing, is what I did in the example above. It starts at the leaves (terminal symbol; <code class="highlighter-rouge">NUMBER</code> above) and moves towards the root. It is exactly what I did above: I started with <code class="highlighter-rouge">NUMBER</code> and reduced it to <code class="highlighter-rouge">math</code> and kept going until it hit <code class="highlighter-rouge">S</code>.</p>
+
+<p>Top Down and Bottom Up parsers are what we use to build language parsers, they are not general parsers so you have to define a grammar for them and that is why we use tools like Bison or Yacc to generate these for us. Furthermore, we can actually break them down into different types of parsing: LL, LR, SLR and LALR. These are a bit complicated to explain here, but <a href="https://en.wikipedia.org/wiki/Context-free_grammar#Subclasses" target="_blank">here is a link to the wikipedia page</a>. If you are curious, the parser we are going to use is a LALR bottom up parsing. This is what powers YACC.</p>
+
+<h2 id="opening-ply">Opening PLY</h2>
+
+<p>Finally, we will get the meat and potatoes of describing a grammar in python for Arbor.</p>
+
+<p>You should already have PLY install and defined the lexicon of the language. If you haven’t go back and <a href="/completely-useless-fun-project-parts-of-the-compiler/">read my post on the lexer</a>. If you want to skip ahead and see what the “final” parser looks like, <a href="https://github.com/radding/Arbor/blob/master/src/parser/__init__.py" target="_blank">go to my github repo for arbor</a></p>
+
+<p>The first thing we have to do when defining our parsing rules is to import yacc and the lexer tokens into our parsing file. We do this so that the parse understands our tokens. So far your parser file should look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>import ply.yacc as yacc
+from src.lexer import tokens
+</code></pre>
+</div>
+
+<p>Next I define a start symbol. Admittedly, I did this because I forgot what the default start symbol is in Ply. That is really as easy as just doing <code class="highlighter-rouge">start = 's'</code>.</p>
+
+<p>At this point your code should look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>import ply.yacc as yacc
+from src.lexer import tokens
+
+start = 's'
+</code></pre>
+</div>
+
+<p>Now we can get started on our parser rules. Ply actually makes this <em>incredibly</em> easy.</p>
+
+<p>To define a rule, all we have to do is define a function that starts with <code class="highlighter-rouge">p_</code> and takes in a single parameter <code class="highlighter-rouge">p</code>. Then we define a <a href="http://www.pythonforbeginners.com/basics/python-docstrings" target="_blank">docstring</a> (similar to the token functions in the lexer) that defines the rules. For example, here is what a function that defines one of our math rules from the earlier example would look like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def p_mathAdd(p):
+  '''math : math '+' math'''
+  pass
+</code></pre>
+</div>
+
+<p>This is exactly equal to <code class="highlighter-rouge">math -&gt; math '+' math</code>.</p>
+
+<p>Yacc will take all of the functions that are prefixed with <code class="highlighter-rouge">p_</code> and generate your LALR tables for you. This makes the parsing so easy on you.</p>
+
+<p>Now to design your language, first you have to keep in mind the structure. I like to break down my rules are generally two types: <code class="highlighter-rouge">statements</code> and <code class="highlighter-rouge">expressions</code>. I define an <code class="highlighter-rouge">expression</code> as a statement that returns a value. So an <code class="highlighter-rouge">expression</code> is a type of statement. From there I define my expressions. Most things in arbors are actually expressions from this. I think the only things that are pure statements are my <code class="highlighter-rouge">@module</code> <code class="highlighter-rouge">@use</code>, and <code class="highlighter-rouge">if/else</code> constructs. Everything else is an expression.</p>
+
+<p>Now of course my program is really just a collection of the different types of statements. So the first few rules I define are:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def p_start(p):
+  '''s : statements'''
+  pass
+
+def p_statements(p):
+  '''statements : statements statement'''
+  pass
+
+def p_statement(p):
+  '''statement : expression SEMICOLON'''
+  pass
+</code></pre>
+</div>
+
+<p>As we recall, I define <code class="highlighter-rouge">s</code> as my starting symbol. So <code class="highlighter-rouge">s</code> can be transformed into <code class="highlighter-rouge">statements</code>. Then statements is really just a combination of <code class="highlighter-rouge">statements</code> and <code class="highlighter-rouge">statement</code>. Finally <code class="highlighter-rouge">statement</code> is an <code class="highlighter-rouge">expression</code> with a <code class="highlighter-rouge">SEMICOLON</code>. <code class="highlighter-rouge">SEMICOLON</code> is a terminal symbol that I defined in me lexer that is, well, a semicolon.</p>
+
+<p>Then I defined expression as a majority of my language. An expression are things a variable name, mathematic expression, function definition, function call, etc. Here is how I define my mathematical operators:</p>
+
+<p>def p_bin_op(p):
+    ‘'’expression : expression PLUS expression
+                  | expression SUB expression
+                  | expression MULTI expression
+                  | expression DIV expression’’’
+    pass</p>
+
+<p>There are two ways you can combine two rules that reduce the same rule. One way, which may be easier to construct your AST, is to define them as separate functions. The above function could also be written as:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def p_add(p):
+  '''expression : expression PLUS expression'''
+  pass
+
+def p_minus(p):
+  '''expression : expression MINUS expression'''
+  pass
+
+...
+</code></pre>
+</div>
+
+<p>Or you can combine them in a single function, separated by a pipe (<code class="highlighter-rouge">|</code>). It really comes down to how you like to do things and your personal preferences. I often use both methods, depending on what I am trying to achieve.</p>
+
+<h3 id="accessing-values-on-the-parser">Accessing Values on the Parser</h3>
+<p>You may have noticed that you pass in a single parameter p into the parser functions. This <code class="highlighter-rouge">p</code> object is the parser object. Using this object you can access the values of the expression that the parser is currently on.</p>
+
+<p>You access this kind of like a list, where <code class="highlighter-rouge">p[0]</code> is the value you want the left hand expression to have (the part before the colon). If you have this rule: <code class="highlighter-rouge">expression : NAME</code>, <code class="highlighter-rouge">p[0]</code> refers to <code class="highlighter-rouge">expression</code>. After that, <code class="highlighter-rouge">p[1]</code> to <code class="highlighter-rouge">p[n]</code> refers to everything after the colon in order. In this rule: <code class="highlighter-rouge">expression : NAME PLUS NAME</code>, <code class="highlighter-rouge">p[1]</code> would refer to the first <code class="highlighter-rouge">NAME</code>, <code class="highlighter-rouge">p[2]</code> refers to the <code class="highlighter-rouge">PLUS</code> and <code class="highlighter-rouge">p[3]</code> refers to the second <code class="highlighter-rouge">NAME</code>. You would assign what you want <code class="highlighter-rouge">expression</code> to equal. For example, in the above rule, you may want <code class="highlighter-rouge">expression</code> to equal to the sum of the two values. That would be done like this: <code class="highlighter-rouge">p[0] = p[1] + p[2]</code>. Notice you don’t return! Instead you just assign p[0] to equal what you think it should return.</p>
+
+<h4 id="note-on-errors">Note on errors:</h4>
+<p>You can handle parser errors by defining a <code class="highlighter-rouge">p_error</code> function or by using the <code class="highlighter-rouge">error</code> symbol. The parse object will have line number, but not column number, so you will have to figure that out. I wrote a function to do that that looks like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def find_column(input, token):
+    last_cr = input.rfind('\n',0,token.lexpos)
+    if last_cr &lt; 0:
+        last_cr = 0
+    column = (token.lexpos - last_cr)
+    return column
+</code></pre>
+</div>
+
+<p>If p is none, that means you hit the end of the file unexpectedly.</p>
+
+<h3 id="actually-parsing">Actually Parsing</h3>
+<p>When you are done defining your rules, you need to instantiate the parser. This is very similar to how the Lexer is instantiated: <code class="highlighter-rouge">parser = yacc.yacc(debug = True)</code>. You don’t need <code class="highlighter-rouge">debug=True</code> although it definitely helps for debugging. After that, the parser object has a method called parse. You pass in the string you want to parse into this method and the parser will get to work. This method returns the value that was assigned to <code class="highlighter-rouge">p[0]</code> in the entry node. For me this is where I do <code class="highlighter-rouge">s : statements</code>, but it could be wherever your start symbol is.</p>
+
+<h2 id="the-wrap-up">The wrap up</h2>
+<p>That’s all there is really to parsing. Parsing is a major part of building a compiler, and the concepts employed in computer language parsing can be used anywhere!</p>
+
+<p>Lexing and Parsing really are the easy part of building a compiler. The fun parts come next: the AST and converting Arbor to LLVM bytecode. That is what I will talk about in the next post!</p>
+
+<p>By the way, I would like to point out that I am a few weeks ahead in building the compiler for Arbor. I am a bit sloppy with my code right now for the Arbor compiler and all of my stuff is in the <code class="highlighter-rouge">parser</code> branch (even though it should be broken down better). If you want to look at the latest and greatest, look at that branch!</p>
+
+<p>As always the link to the Arbor project is here: <a href="https://github.com/radding/Arbor" target="_blank">https://github.com/radding/Arbor</a></p>
+
+    </div>
+    
+    <div class="post_wrapper">
+      <footer class="post_footer cf">
+        <div class="post_share">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=Completely Useless Fun Project: Building The Parser&url=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://facebook.com/sharer.php?u=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://plus.google.com/share?url=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+        </div>
+        <div class="post_tag">
+          <span>Tags:</span>
+          
+          <a href="/tags#programming" class="tag">programming</a>
+          
+          <a href="/tags#Arbor" class="tag">Arbor</a>
+          
+          <a href="/tags#New Language" class="tag">New Language</a>
+          
+          <a href="/tags#Functional" class="tag">Functional</a>
+          
+          <a href="/tags#web assembly" class="tag">web assembly</a>
+          
+          <a href="/tags#arbor" class="tag">arbor</a>
+          
+          <a href="/tags#completely useless fun project" class="tag">completely useless fun project</a>
+          
+          <a href="/tags#parser" class="tag">parser</a>
+          
+        </div>
+      </footer>
+    </div>
+  </article> <!-- End Section Post -->
+
+  <section class="author cf">
+    <div class="post_wrapper">
+      <div class="author_image">
+        <img src="/assets/img/face.jpg" alt="Author face">
+      </div>
+      <div class="author_info">
+        <h2 class="author_title">Yoseph Radding</h2>
+        <p class="author_subtitle"><p>Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
+</p>
+        <div class="author_social">
+          
+          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
+          
+          
+          
+
+          
+          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="http://yoseph.tech" target="_blank">http://yoseph.tech</a></span>
+          
+          
+            <span>
+              <a href="https://twitter.com/raddingy" target="_blank">
+                <i class="fa fa-twitter" aria-hidden="true"></i> @raddingy
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    </div>
+  </section> <!-- End Section Author -->
+
+  <section class="recent_box">
+    <div class="post_wrapper">
+      <h2 class="recent_title">Recent posts</h2>
+      <div class="recent_list">
+        
+          
+            <a href="/completely-useless-fun-project-building-the-parser/" class="recent_item" style="background-image: url( /assets/img/parser.png )"><span>Completely Useless Fun Project: Building The Parser</span></a>
+          
+        
+          
+            <a href="/completely-useless-fun-project-parts-of-the-compiler/" class="recent_item" style="background-image: url( /assets/img/compilers.jpg )"><span>Completely Useless Fun Project: Parts Of The Compiler</span></a>
+          
+        
+          
+            <a href="/completely-useless-fun-project-build-a-new-programming-language/" class="recent_item" style="background-image: url( /assets/img/programming-languages.jpg )"><span>Completely Useless Fun Project: Building A New Programming Language</span></a>
+          
+        
+          
+            <a href="/building-production-code/" class="recent_item" style="background-image: url( /assets/img/code_screen_shot.jpg )"><span>Building Production Code</span></a>
+          
+        
+          
+            <a href="/building-an-arcade-controller/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building An Arcade Controller</span></a>
+          
+        
+          
+            <a href="/building-a-raspberry-pi-arcade-machine/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building A Raspberry Pi Arcade Machine</span></a>
+          
+        
+      </div>
+    </div>
+  </section> <!-- End Section Recent Box -->
+  
+  
+<section class="comment_area">
+  <div class="comment_wrapper">
+    
+    <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://yoseph-tech.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                            
+    
+  </div>
+</section> <!-- End Section Comment Area -->
+  
+</main> <!-- End Section Post Content -->
+
+
+<footer class="main_footer">
+  <div class="wrapper">
+    
+<ul class="social_footer">
+  
+  
+    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+  
+  
+  
+    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
+  
+  
+  
+  
+    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+  
+</ul>
+    <div class="copyright">
+      <p>&copy; 2017 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
+      <p><em>All opinions expressed are my own</em></p>
+    </div>
+  </div>
+</footer> <!-- End Section Footer -->
+
+
+  
+<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
+  
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/jquery.vide.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+<script id="dsq-count-scr" src="//yoseph-tech.disqus.com/count.js" async></script>
+<!-- End Javascript -->
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-83670049-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-83670049-2');
+</script>
+
+</body>
+</html>

@@ -1,5 +1,186 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://yoseph.tech/feed.xml" rel="self" type="application/atom+xml" /><link href="http://yoseph.tech/" rel="alternate" type="text/html" /><updated>2017-11-10T09:07:25-05:00</updated><id>http://yoseph.tech/</id><title type="html">Yoseph.TECH | All things Tech</title><subtitle>An awesome website for tech related shenanigans. Maybe even the ocassional cat picture. (I have the best cat)
-</subtitle><entry><title type="html">Completely Useless Fun Project: Parts Of The Compiler</title><link href="http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/" rel="alternate" type="text/html" title="Completely Useless Fun Project: Parts Of The Compiler" /><published>2017-11-08T03:04:06-05:00</published><updated>2017-11-08T03:04:06-05:00</updated><id>http://yoseph.tech/completely-useless-fun-project:-parts-of-the-compiler</id><content type="html" xml:base="http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/">If you have done C/C++ or Objective-C work on MacOS (There is a project called [GNUStep](http://www.techotopia.com/index.php/Installing_and_Using_GNUstep_and_Objective-C_on_Linux){:target=&quot;_blank&quot;} that allows you to run Obj-C on Linux), you may have heard of Clang and LLVM, or maybe Clang/LLVM. It may have confused you because there are two names for a seemingly single piece of software. It may confuse you further to point out that these *are* two different things, but two pieces to the same puzzle.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://yoseph.tech/feed.xml" rel="self" type="application/atom+xml" /><link href="http://yoseph.tech/" rel="alternate" type="text/html" /><updated>2017-12-05T18:32:51-05:00</updated><id>http://yoseph.tech/</id><title type="html">Yoseph.TECH | All things Tech</title><subtitle>An awesome website for tech related shenanigans. Maybe even the ocassional cat picture. (I have the best cat)
+</subtitle><entry><title type="html">Completely Useless Fun Project: Building The Parser</title><link href="http://yoseph.tech/completely-useless-fun-project-building-the-parser/" rel="alternate" type="text/html" title="Completely Useless Fun Project: Building The Parser" /><published>2017-11-18T06:27:01-05:00</published><updated>2017-11-18T06:27:01-05:00</updated><id>http://yoseph.tech/completely-useless-fun-project:-building-the-parser</id><content type="html" xml:base="http://yoseph.tech/completely-useless-fun-project-building-the-parser/">&lt;p&gt;It’s been awhile but I’m ready to get back into it. I was traveling pretty extensively for thanksgiving and didn’t have that much time in front of my computer. I hope everyone had a great thanksgiving!&lt;/p&gt;
+
+&lt;p&gt;Anyway, &lt;a href=&quot;/completely-useless-fun-project-parts-of-the-compiler/&quot; target=&quot;_blank&quot;&gt;we already spoke about the history, design and implementing a lexer.&lt;/a&gt;. This post is going to focus on building the parser.&lt;/p&gt;
+
+&lt;p&gt;Lexing, as we gathered a few weeks ago, is the lexical analysis part of the compiler. This is the process of deciding what each stream of characters mean. Are these characters some number? Are they a reserved keyword? Are the a variable name? The lexer will determine this.&lt;/p&gt;
+
+&lt;p&gt;The next part of the compiler, is syntactic analysis. This is what the parser does, analyze the syntax of your language. This is different than analyzing the semantics of your language, however, and that is what we will talk about next time.&lt;/p&gt;
+
+&lt;h2 id=&quot;parsing-a-language&quot;&gt;Parsing a language&lt;/h2&gt;
+&lt;p&gt;In order to parse a language, you must first take into account grammar. Grammar is the set of rules that make up valid statements (often referred to as the alphabet) in a language. This is how a compiler knows that &lt;code class=&quot;highlighter-rouge&quot;&gt;1 + 1&lt;/code&gt; is valid, while knowing &lt;code class=&quot;highlighter-rouge&quot;&gt;1 + + 1&lt;/code&gt; is not. It is important to know that a grammar does not know the meaning of a string, only the form it may take. The job of determining the meaning of the string comes from semantic parsing, which we will cover next week.&lt;/p&gt;
+
+&lt;p&gt;There are many different types of grammars, defined by noted linguist &lt;a href=&quot;https://chomsky.info/bios/&quot; target=&quot;_blank&quot;&gt;Noam Chomsky&lt;/a&gt;. These include regular, context-free, context-sensitive, and recursively enumerable. We actually spoke a little bit about regular grammars. Regular grammars are what powers Regular Expressions!&lt;/p&gt;
+
+&lt;figure&gt;
+  &lt;img src=&quot;https://www.tutorialspoint.com/automata_theory/images/containment_of_type3_type2_type1_type0.jpg&quot; alt=&quot;*Chomsky's Hierarchy of Grammars*&quot; class=&quot;&quot; /&gt;
+  &lt;figcaption&gt;&lt;p&gt;&lt;em&gt;Chomsky’s Hierarchy of Grammars&lt;/em&gt;&lt;/p&gt;
+&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;You may be wondering why we can’t use regular expression as our parser for building the entire programming language. The answer is not that simple. For simple languages a regular grammar may be good enough. But for more complex languages, regular grammars are hard to work with. This is because Regular grammars are either right-left or left-right (aka linear) whereas a grammar like context-free (which is what we will use to build Arbor’s parser) can basically be any combination of symbols.&lt;/p&gt;
+
+&lt;h3 id=&quot;context-free-grammars&quot;&gt;Context Free Grammars&lt;/h3&gt;
+&lt;p&gt;Context Free Grammars are the backbone of parsing a language. A Context Free Grammar is a set of production rules that describe all possible strings in a given language. These production rules are simple replacements and take the form &lt;code class=&quot;highlighter-rouge&quot;&gt;B -&amp;gt; ß&lt;/code&gt;. This rule means that when you encounter a &lt;code class=&quot;highlighter-rouge&quot;&gt;B&lt;/code&gt; replace it with a &lt;code class=&quot;highlighter-rouge&quot;&gt;ß&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You can make a whole bunch of rules for a Context-Free-Grammar (CFG). The beauty of it is that these can literally go on for ever. Take the following Grammar for example:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;A -&amp;gt; aA
+A -&amp;gt; a
+B -&amp;gt; b
+B -&amp;gt; bB
+S -&amp;gt; AB
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This languages could take any string with all &lt;code class=&quot;highlighter-rouge&quot;&gt;a&lt;/code&gt;s first and all &lt;code class=&quot;highlighter-rouge&quot;&gt;b&lt;/code&gt;s last. This takes &lt;code class=&quot;highlighter-rouge&quot;&gt;abbbbbbbbbbbbbbbbbbbbbbbbbb&lt;/code&gt; as well as &lt;code class=&quot;highlighter-rouge&quot;&gt;aaaaaaaaaaaaabbbbbbbbbb&lt;/code&gt;. When the parser encounters an &lt;code class=&quot;highlighter-rouge&quot;&gt;a&lt;/code&gt; it replaces it with an &lt;code class=&quot;highlighter-rouge&quot;&gt;A&lt;/code&gt;, so now a string like &lt;code class=&quot;highlighter-rouge&quot;&gt;aaabbb&lt;/code&gt; becomes &lt;code class=&quot;highlighter-rouge&quot;&gt;aaAbbb&lt;/code&gt;. Next it sees &lt;code class=&quot;highlighter-rouge&quot;&gt;aA&lt;/code&gt; and replaces that with &lt;code class=&quot;highlighter-rouge&quot;&gt;A&lt;/code&gt; so the string becomes &lt;code class=&quot;highlighter-rouge&quot;&gt;aAbbb&lt;/code&gt;. This is performed one more time so that it becomes &lt;code class=&quot;highlighter-rouge&quot;&gt;Abbb&lt;/code&gt;. Then, we do the same thing to the &lt;code class=&quot;highlighter-rouge&quot;&gt;b&lt;/code&gt;s: &lt;code class=&quot;highlighter-rouge&quot;&gt;Abbb&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;AbbB&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;AbB&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;AB&lt;/code&gt;. Next we recognize that &lt;code class=&quot;highlighter-rouge&quot;&gt;AB&lt;/code&gt; can be reduced to &lt;code class=&quot;highlighter-rouge&quot;&gt;S&lt;/code&gt; and so &lt;code class=&quot;highlighter-rouge&quot;&gt;AB&lt;/code&gt; becomes &lt;code class=&quot;highlighter-rouge&quot;&gt;S&lt;/code&gt;. And &lt;code class=&quot;highlighter-rouge&quot;&gt;S&lt;/code&gt; is our starting symbol and so we are done.&lt;/p&gt;
+
+&lt;p&gt;Using this, we can define a simple grammar that can perform any arithmetic operation:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;S -&amp;gt; math
+math -&amp;gt; math '+' math
+math -&amp;gt; math '-' math
+math -&amp;gt; math '*' math
+math -&amp;gt; math '/' math
+math -&amp;gt; NUMBER
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;So here we define &lt;code class=&quot;highlighter-rouge&quot;&gt;NUMBER&lt;/code&gt; as any number, integer, or float. It is in all caps to show that it is not a grammar rule (non-terminal symbol), but a terminal symbol. A Non-Terminal Symbol is a symbol that can be reduced into a form that is a group of terminal symbols. Terminal symbols are the building blocks of the language. These are the lexemes you defined in the lexer. &lt;a href=&quot;https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols&quot; target=&quot;_blank&quot;&gt;In other words, non-terminal symbols can be reduced to other symbols, either terminal or otherwise, while terminal symbols can not&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In our grammar, &lt;code class=&quot;highlighter-rouge&quot;&gt;NUMBER&lt;/code&gt; is the end of the road. We can’t reduce it to anything else. &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt;. It won’t become &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now is this grammar valid? A simple test says yes: &lt;code class=&quot;highlighter-rouge&quot;&gt;1 + 2 * 3 - 8 + 66 / 3 * 4&lt;/code&gt; is valid as well as &lt;code class=&quot;highlighter-rouge&quot;&gt;1 + 2&lt;/code&gt;. Let’s see why, using &lt;code class=&quot;highlighter-rouge&quot;&gt;1 + 2 * 3 - 8 + 66 / 3 * 4&lt;/code&gt; as an example.&lt;/p&gt;
+
+&lt;p&gt;If we run &lt;code class=&quot;highlighter-rouge&quot;&gt;1 + 2 * 3 - 8 + 66 / 3 * 4&lt;/code&gt; through our lexer, the string becomes &lt;code class=&quot;highlighter-rouge&quot;&gt;NUMBER + NUMBER * NUMBER - NUMBER + NUMBER / NUMBER * NUMBER&lt;/code&gt;. One of our rules says that &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt; can become a &lt;code class=&quot;highlighter-rouge&quot;&gt;NUMBER&lt;/code&gt; so there we go. The parser turns the string into &lt;code class=&quot;highlighter-rouge&quot;&gt;math + math * math - math + math / math * math&lt;/code&gt;. Then the arithmetic rules come into play: we can reduce &lt;code class=&quot;highlighter-rouge&quot;&gt;math + math&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt;, so &lt;code class=&quot;highlighter-rouge&quot;&gt;math + math * math - math + math / math * math&lt;/code&gt; becomes &lt;code class=&quot;highlighter-rouge&quot;&gt;math * math - math + math / math * math&lt;/code&gt;. We can do that for every rule in that string: &lt;code class=&quot;highlighter-rouge&quot;&gt;math * math - math + math / math * math&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;math - math + math / math * math&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;math + math / math * math&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;math / math * math&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;math * math&lt;/code&gt; -&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt;. And we are done. That was a valid string.&lt;/p&gt;
+
+&lt;p&gt;Of course none of this really helps because it looks like you are actually losing data, which is sort of true. But the tools that we will use actually makes it easy to maintain the structure of the program, which I will talk about next week when talking about the Abstract Syntax Tree.&lt;/p&gt;
+
+&lt;h2 id=&quot;types-of-cfg-parsers&quot;&gt;Types of CFG Parsers&lt;/h2&gt;
+
+&lt;p&gt;There are are few different types of CFG parsers; General Parsers, Top Down parser, and Bottom up Parsers.&lt;/p&gt;
+
+&lt;p&gt;General parsers can parse any GFG, but they are incredibly inefficient for production use, so I will not say much more about them.&lt;/p&gt;
+
+&lt;p&gt;Top down parsers start at the start symbol (&lt;code class=&quot;highlighter-rouge&quot;&gt;S&lt;/code&gt; in my math example above) and moves towards the leaves (or terminal symbols)&lt;/p&gt;
+
+&lt;p&gt;Bottom Up Parsing, is what I did in the example above. It starts at the leaves (terminal symbol; &lt;code class=&quot;highlighter-rouge&quot;&gt;NUMBER&lt;/code&gt; above) and moves towards the root. It is exactly what I did above: I started with &lt;code class=&quot;highlighter-rouge&quot;&gt;NUMBER&lt;/code&gt; and reduced it to &lt;code class=&quot;highlighter-rouge&quot;&gt;math&lt;/code&gt; and kept going until it hit &lt;code class=&quot;highlighter-rouge&quot;&gt;S&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Top Down and Bottom Up parsers are what we use to build language parsers, they are not general parsers so you have to define a grammar for them and that is why we use tools like Bison or Yacc to generate these for us. Furthermore, we can actually break them down into different types of parsing: LL, LR, SLR and LALR. These are a bit complicated to explain here, but &lt;a href=&quot;https://en.wikipedia.org/wiki/Context-free_grammar#Subclasses&quot; target=&quot;_blank&quot;&gt;here is a link to the wikipedia page&lt;/a&gt;. If you are curious, the parser we are going to use is a LALR bottom up parsing. This is what powers YACC.&lt;/p&gt;
+
+&lt;h2 id=&quot;opening-ply&quot;&gt;Opening PLY&lt;/h2&gt;
+
+&lt;p&gt;Finally, we will get the meat and potatoes of describing a grammar in python for Arbor.&lt;/p&gt;
+
+&lt;p&gt;You should already have PLY install and defined the lexicon of the language. If you haven’t go back and &lt;a href=&quot;/completely-useless-fun-project-parts-of-the-compiler/&quot;&gt;read my post on the lexer&lt;/a&gt;. If you want to skip ahead and see what the “final” parser looks like, &lt;a href=&quot;https://github.com/radding/Arbor/blob/master/src/parser/__init__.py&quot; target=&quot;_blank&quot;&gt;go to my github repo for arbor&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The first thing we have to do when defining our parsing rules is to import yacc and the lexer tokens into our parsing file. We do this so that the parse understands our tokens. So far your parser file should look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import ply.yacc as yacc
+from src.lexer import tokens
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Next I define a start symbol. Admittedly, I did this because I forgot what the default start symbol is in Ply. That is really as easy as just doing &lt;code class=&quot;highlighter-rouge&quot;&gt;start = 's'&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;At this point your code should look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import ply.yacc as yacc
+from src.lexer import tokens
+
+start = 's'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Now we can get started on our parser rules. Ply actually makes this &lt;em&gt;incredibly&lt;/em&gt; easy.&lt;/p&gt;
+
+&lt;p&gt;To define a rule, all we have to do is define a function that starts with &lt;code class=&quot;highlighter-rouge&quot;&gt;p_&lt;/code&gt; and takes in a single parameter &lt;code class=&quot;highlighter-rouge&quot;&gt;p&lt;/code&gt;. Then we define a &lt;a href=&quot;http://www.pythonforbeginners.com/basics/python-docstrings&quot; target=&quot;_blank&quot;&gt;docstring&lt;/a&gt; (similar to the token functions in the lexer) that defines the rules. For example, here is what a function that defines one of our math rules from the earlier example would look like:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def p_mathAdd(p):
+  '''math : math '+' math'''
+  pass
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This is exactly equal to &lt;code class=&quot;highlighter-rouge&quot;&gt;math -&amp;gt; math '+' math&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Yacc will take all of the functions that are prefixed with &lt;code class=&quot;highlighter-rouge&quot;&gt;p_&lt;/code&gt; and generate your LALR tables for you. This makes the parsing so easy on you.&lt;/p&gt;
+
+&lt;p&gt;Now to design your language, first you have to keep in mind the structure. I like to break down my rules are generally two types: &lt;code class=&quot;highlighter-rouge&quot;&gt;statements&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;expressions&lt;/code&gt;. I define an &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; as a statement that returns a value. So an &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; is a type of statement. From there I define my expressions. Most things in arbors are actually expressions from this. I think the only things that are pure statements are my &lt;code class=&quot;highlighter-rouge&quot;&gt;@module&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;@use&lt;/code&gt;, and &lt;code class=&quot;highlighter-rouge&quot;&gt;if/else&lt;/code&gt; constructs. Everything else is an expression.&lt;/p&gt;
+
+&lt;p&gt;Now of course my program is really just a collection of the different types of statements. So the first few rules I define are:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def p_start(p):
+  '''s : statements'''
+  pass
+
+def p_statements(p):
+  '''statements : statements statement'''
+  pass
+
+def p_statement(p):
+  '''statement : expression SEMICOLON'''
+  pass
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;As we recall, I define &lt;code class=&quot;highlighter-rouge&quot;&gt;s&lt;/code&gt; as my starting symbol. So &lt;code class=&quot;highlighter-rouge&quot;&gt;s&lt;/code&gt; can be transformed into &lt;code class=&quot;highlighter-rouge&quot;&gt;statements&lt;/code&gt;. Then statements is really just a combination of &lt;code class=&quot;highlighter-rouge&quot;&gt;statements&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;statement&lt;/code&gt;. Finally &lt;code class=&quot;highlighter-rouge&quot;&gt;statement&lt;/code&gt; is an &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; with a &lt;code class=&quot;highlighter-rouge&quot;&gt;SEMICOLON&lt;/code&gt;. &lt;code class=&quot;highlighter-rouge&quot;&gt;SEMICOLON&lt;/code&gt; is a terminal symbol that I defined in me lexer that is, well, a semicolon.&lt;/p&gt;
+
+&lt;p&gt;Then I defined expression as a majority of my language. An expression are things a variable name, mathematic expression, function definition, function call, etc. Here is how I define my mathematical operators:&lt;/p&gt;
+
+&lt;p&gt;def p_bin_op(p):
+    ‘'’expression : expression PLUS expression
+                  | expression SUB expression
+                  | expression MULTI expression
+                  | expression DIV expression’’’
+    pass&lt;/p&gt;
+
+&lt;p&gt;There are two ways you can combine two rules that reduce the same rule. One way, which may be easier to construct your AST, is to define them as separate functions. The above function could also be written as:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def p_add(p):
+  '''expression : expression PLUS expression'''
+  pass
+
+def p_minus(p):
+  '''expression : expression MINUS expression'''
+  pass
+
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Or you can combine them in a single function, separated by a pipe (&lt;code class=&quot;highlighter-rouge&quot;&gt;|&lt;/code&gt;). It really comes down to how you like to do things and your personal preferences. I often use both methods, depending on what I am trying to achieve.&lt;/p&gt;
+
+&lt;h3 id=&quot;accessing-values-on-the-parser&quot;&gt;Accessing Values on the Parser&lt;/h3&gt;
+&lt;p&gt;You may have noticed that you pass in a single parameter p into the parser functions. This &lt;code class=&quot;highlighter-rouge&quot;&gt;p&lt;/code&gt; object is the parser object. Using this object you can access the values of the expression that the parser is currently on.&lt;/p&gt;
+
+&lt;p&gt;You access this kind of like a list, where &lt;code class=&quot;highlighter-rouge&quot;&gt;p[0]&lt;/code&gt; is the value you want the left hand expression to have (the part before the colon). If you have this rule: &lt;code class=&quot;highlighter-rouge&quot;&gt;expression : NAME&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;p[0]&lt;/code&gt; refers to &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt;. After that, &lt;code class=&quot;highlighter-rouge&quot;&gt;p[1]&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;p[n]&lt;/code&gt; refers to everything after the colon in order. In this rule: &lt;code class=&quot;highlighter-rouge&quot;&gt;expression : NAME PLUS NAME&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;p[1]&lt;/code&gt; would refer to the first &lt;code class=&quot;highlighter-rouge&quot;&gt;NAME&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;p[2]&lt;/code&gt; refers to the &lt;code class=&quot;highlighter-rouge&quot;&gt;PLUS&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;p[3]&lt;/code&gt; refers to the second &lt;code class=&quot;highlighter-rouge&quot;&gt;NAME&lt;/code&gt;. You would assign what you want &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; to equal. For example, in the above rule, you may want &lt;code class=&quot;highlighter-rouge&quot;&gt;expression&lt;/code&gt; to equal to the sum of the two values. That would be done like this: &lt;code class=&quot;highlighter-rouge&quot;&gt;p[0] = p[1] + p[2]&lt;/code&gt;. Notice you don’t return! Instead you just assign p[0] to equal what you think it should return.&lt;/p&gt;
+
+&lt;h4 id=&quot;note-on-errors&quot;&gt;Note on errors:&lt;/h4&gt;
+&lt;p&gt;You can handle parser errors by defining a &lt;code class=&quot;highlighter-rouge&quot;&gt;p_error&lt;/code&gt; function or by using the &lt;code class=&quot;highlighter-rouge&quot;&gt;error&lt;/code&gt; symbol. The parse object will have line number, but not column number, so you will have to figure that out. I wrote a function to do that that looks like:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def find_column(input, token):
+    last_cr = input.rfind('\n',0,token.lexpos)
+    if last_cr &amp;lt; 0:
+        last_cr = 0
+    column = (token.lexpos - last_cr)
+    return column
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;If p is none, that means you hit the end of the file unexpectedly.&lt;/p&gt;
+
+&lt;h3 id=&quot;actually-parsing&quot;&gt;Actually Parsing&lt;/h3&gt;
+&lt;p&gt;When you are done defining your rules, you need to instantiate the parser. This is very similar to how the Lexer is instantiated: &lt;code class=&quot;highlighter-rouge&quot;&gt;parser = yacc.yacc(debug = True)&lt;/code&gt;. You don’t need &lt;code class=&quot;highlighter-rouge&quot;&gt;debug=True&lt;/code&gt; although it definitely helps for debugging. After that, the parser object has a method called parse. You pass in the string you want to parse into this method and the parser will get to work. This method returns the value that was assigned to &lt;code class=&quot;highlighter-rouge&quot;&gt;p[0]&lt;/code&gt; in the entry node. For me this is where I do &lt;code class=&quot;highlighter-rouge&quot;&gt;s : statements&lt;/code&gt;, but it could be wherever your start symbol is.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-wrap-up&quot;&gt;The wrap up&lt;/h2&gt;
+&lt;p&gt;That’s all there is really to parsing. Parsing is a major part of building a compiler, and the concepts employed in computer language parsing can be used anywhere!&lt;/p&gt;
+
+&lt;p&gt;Lexing and Parsing really are the easy part of building a compiler. The fun parts come next: the AST and converting Arbor to LLVM bytecode. That is what I will talk about in the next post!&lt;/p&gt;
+
+&lt;p&gt;By the way, I would like to point out that I am a few weeks ahead in building the compiler for Arbor. I am a bit sloppy with my code right now for the Arbor compiler and all of my stuff is in the &lt;code class=&quot;highlighter-rouge&quot;&gt;parser&lt;/code&gt; branch (even though it should be broken down better). If you want to look at the latest and greatest, look at that branch!&lt;/p&gt;
+
+&lt;p&gt;As always the link to the Arbor project is here: &lt;a href=&quot;https://github.com/radding/Arbor&quot; target=&quot;_blank&quot;&gt;https://github.com/radding/Arbor&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="programming" /><category term="Arbor" /><category term="New Language" /><category term="Functional" /><category term="web assembly" /><category term="arbor" /><category term="completely useless fun project" /><category term="parser" /><summary type="html">It’s been awhile but I’m ready to get back into it. I was traveling pretty extensively for thanksgiving and didn’t have that much time in front of my computer. I hope everyone had a great thanksgiving!</summary></entry><entry><title type="html">Completely Useless Fun Project: Parts Of The Compiler</title><link href="http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/" rel="alternate" type="text/html" title="Completely Useless Fun Project: Parts Of The Compiler" /><published>2017-11-08T03:04:06-05:00</published><updated>2017-11-08T03:04:06-05:00</updated><id>http://yoseph.tech/completely-useless-fun-project:-parts-of-the-compiler</id><content type="html" xml:base="http://yoseph.tech/completely-useless-fun-project-parts-of-the-compiler/">If you have done C/C++ or Objective-C work on MacOS (There is a project called [GNUStep](http://www.techotopia.com/index.php/Installing_and_Using_GNUstep_and_Objective-C_on_Linux){:target=&quot;_blank&quot;} that allows you to run Obj-C on Linux), you may have heard of Clang and LLVM, or maybe Clang/LLVM. It may have confused you because there are two names for a seemingly single piece of software. It may confuse you further to point out that these *are* two different things, but two pieces to the same puzzle.
 
 What Clang and LLVM are, are the pieces of a compiler. A compiler is really just a single group of processes that takes in some source code and outputs some other code. This output code could be Assembly code, Java ByteCode, hell even [Javascript](https://en.wikipedia.org/wiki/Source-to-source_compiler){:target=&quot;_blank&quot;}. Like all good programming problems, compiler construction can be broken down into various parts. 
 
