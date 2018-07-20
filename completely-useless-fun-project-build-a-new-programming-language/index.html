@@ -50,6 +50,7 @@
       <div class="post_description">
         <p class="post_meta">2017, Nov 03</p>
         <h1 class="post_title">Completely Useless Fun Project: Building A New Programming Language</h1>
+        <p class="post_meta"> Reading Time: 14 minutes</p>
       </div>
     </header> <!-- End Header -->
 
@@ -109,43 +110,38 @@
 <h3 id="functions-definitions">Functions Definitions</h3>
 <p>I also liked the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank">JavaScript arrow function</a> syntax (this is part of the reason why arbor has <code class="highlighter-rouge">-&gt;</code> to define functions), and especially the behaviour where a single line means return and a function body means do this whole function body. But at the same time I like Python’s no curly brace syntax. So what I did was do something that a lot of other languages do: I defined an end statement. So in Arbor, you would define a function two ways:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>let foo = (a, b, c) -&gt; a + b + c;
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let foo = (a, b, c) -&gt; a + b + c;
+</code></pre></div></div>
 
 <p>or</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>let foo = (a, b, c) -&gt; 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let foo = (a, b, c) -&gt; 
     return a + b + c;
 done;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Another thing I like about python is the way you can implement default parameters. In arbor it will be done similarly:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>(a = 1, b = 2) -&gt; a + b;
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(a = 1, b = 2) -&gt; a + b;
+</code></pre></div></div>
 
 <p>One thing that a lot of people complain about in Python, and this also trips up people coming from languages such as Java or C/C++, is that you can pass in any type into a function. This could cause issue where you expect a string, but instead receive an int, causing your application to crash. All though this is something you’re unit tests should catch, I also wanted to “fix” this with compile time type checking. Plus I think this makes the language that much more descriptive in my mind. If you want type checking and defaults, I think it should look like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>(a:int, b:int = 2) -&gt; a + b;
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(a:int, b:int = 2) -&gt; a + b;
+</code></pre></div></div>
 
 <p>Taking another principle from Python is packing and unpacking of variables in functions. Similarly to <code class="highlighter-rouge">function(...args)</code> in es6, python allows you to define lift over params as such: <code class="highlighter-rouge">def foo(a, *args)</code>. Arbor will do something similar: <code class="highlighter-rouge">foo = (a, b, *args) -&gt; ...</code>. Then you can call this function like so: <code class="highlighter-rouge">foo(1, 2, 3, 4, 5, 6)</code>.
 And like Python, I also want Arbor to support named leftover variables: <code class="highlighter-rouge">def foo(a, b, **kwargs)</code>, in arbor would be: <code class="highlighter-rouge">foo = (a, b **kwargs) -&gt; ...</code>. Where <code class="highlighter-rouge">kwargs</code> is a dictionary.</p>
 
 <p>And finally variable unpacking. Python has this really neat concept called unpacking if you have a function definition like</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def foo(a, b, c, d, e, f, g):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def foo(a, b, c, d, e, f, g):
     pass
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>you can call that function like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>arr = [1, 2, 3, 4, 5, 6, 7]
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arr = [1, 2, 3, 4, 5, 6, 7]
 foo(*arr)
 
 # or
@@ -160,12 +156,11 @@ vals = {
     "g": 7 
 }
 foo(**arr)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>With default parameters, any parameter not in the dict or array will be the default. I want Arbor to support this exactly the same way:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>foo = (a, b, c, d, e, f, g) -&gt; null;
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>foo = (a, b, c, d, e, f, g) -&gt; null;
 arr  = [1, 2, 3, 4, 5, 6, 7];
 foo(*arr)
 
@@ -181,27 +176,25 @@ dict = {
     g: 6,
 }
 foo(**dict)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="control-and-flow">Control and flow</h3>
 <p>In true functional programming fasion, I decided to do away with loops. Instead all loops should be implemented using recursion constructs. Additionally, built in functions such as <code class="highlighter-rouge">forEach</code>, <code class="highlighter-rouge">map</code>, <code class="highlighter-rouge">filter</code>, <code class="highlighter-rouge">fold</code> or <code class="highlighter-rouge">reduce</code> will be implemented in order to make implementing loop behaviour easier.</p>
 
 <p>Additionally, as well as having traditional control flow, <code class="highlighter-rouge">if</code>, <code class="highlighter-rouge">else</code>, <code class="highlighter-rouge">else if</code> statements, I will also have haskell like predicates. These could be similar enough to case statements in Elm. These would look like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>(a, b) -&gt; 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(a, b) -&gt; 
     : a &gt; b -&gt; 
         if (a != b)
             return "greater than"
     : a &lt; b -&gt; "less than";
     : true -&gt; "equal to";
 done;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This should be functionally equivalent to</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>(a, b) -&gt; 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(a, b) -&gt; 
     if (a &gt; b): 
         return "greater than";
     else if (a &lt; b):
@@ -210,36 +203,32 @@ done;
         return "equal to";
     done;
 done;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>And finally, ternary operators. I really like ternary operators. They are elegant and makes code easier to read for small stuff. However, I think JavaScript’s and C/C++’s ternary operator leaves something to be desired. I really like Python’s ternary operator and that is exactly how ternaries in Arbor should work: <code class="highlighter-rouge">value if &lt;condition&gt; else other value</code>.</p>
 
 <h3 id="data-and-types">Data and Types</h3>
 <p>The only data types I want to include in Arbor are Integers, Floats, chars, Arrays, and Dictionaries. A string keyword will be available, but, like C/C++, it is really just an array of chars. Arbor will also provide <code class="highlighter-rouge">true</code> and <code class="highlighter-rouge">false</code> keywords that is really just 1 and 0 integers. Arbor should have a typedef operator that allows developers to define their own types. This would be similar to how C defines structs:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Person = type {
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Person = type {
     name: string,
     age: int,
     favorites: array
 }
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This defines a type so that you can do things like</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>person = instantiate(Person);
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>person = instantiate(Person);
 person.name = "yoseph";
 person.age = 22;
 person.favorites = ["programming", "Arbor"]
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>or</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>person = instantiate(Person, name="yoseph", age="22", favorites);
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>person = instantiate(Person, name="yoseph", age="22", favorites);
+</code></pre></div></div>
 
 <p>Functions are also first order citizens so that you can pass them as functions or in new types. Types can also refer to themselves, making the type composable and building complex structures like a tree.</p>
 
@@ -335,7 +324,7 @@ person.favorites = ["programming", "Arbor"]
       <div class="recent_list">
         
           
-            <a href="/event-driven-programing-in-django/" class="recent_item" style="background-image: url( /assets/img/events-icon.gif )"><span>Event Driven Programing In Django</span></a>
+            <a href="/lets-change-how-we-speak-about-testing/" class="recent_item" style="background-image: url( /assets/img/tdd.jpeg )"><span>From Test Driven Development to Test Driven Design</span></a>
           
         
           

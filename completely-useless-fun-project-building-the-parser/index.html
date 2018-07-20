@@ -48,8 +48,9 @@
         <img src=/assets/img/parser.png alt="Completely Useless Fun Project: Building The Parser">
       </div>
       <div class="post_description">
-        <p class="post_meta">2017, Dec 02</p>
+        <p class="post_meta">2017, Nov 18</p>
         <h1 class="post_title">Completely Useless Fun Project: Building The Parser</h1>
+        <p class="post_meta"> Reading Time: 13 minutes</p>
       </div>
     </header> <!-- End Header -->
 
@@ -80,26 +81,24 @@
 
 <p>You can make a whole bunch of rules for a Context-Free-Grammar (CFG). The beauty of it is that these can literally go on for ever. Take the following Grammar for example:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>A -&gt; aA
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A -&gt; aA
 A -&gt; a
 B -&gt; b
 B -&gt; bB
 S -&gt; AB
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This languages could take any string with all <code class="highlighter-rouge">a</code>s first and all <code class="highlighter-rouge">b</code>s last. This takes <code class="highlighter-rouge">abbbbbbbbbbbbbbbbbbbbbbbbbb</code> as well as <code class="highlighter-rouge">aaaaaaaaaaaaabbbbbbbbbb</code>. When the parser encounters an <code class="highlighter-rouge">a</code> it replaces it with an <code class="highlighter-rouge">A</code>, so now a string like <code class="highlighter-rouge">aaabbb</code> becomes <code class="highlighter-rouge">aaAbbb</code>. Next it sees <code class="highlighter-rouge">aA</code> and replaces that with <code class="highlighter-rouge">A</code> so the string becomes <code class="highlighter-rouge">aAbbb</code>. This is performed one more time so that it becomes <code class="highlighter-rouge">Abbb</code>. Then, we do the same thing to the <code class="highlighter-rouge">b</code>s: <code class="highlighter-rouge">Abbb</code> -&gt; <code class="highlighter-rouge">AbbB</code> -&gt; <code class="highlighter-rouge">AbB</code> -&gt; <code class="highlighter-rouge">AB</code>. Next we recognize that <code class="highlighter-rouge">AB</code> can be reduced to <code class="highlighter-rouge">S</code> and so <code class="highlighter-rouge">AB</code> becomes <code class="highlighter-rouge">S</code>. And <code class="highlighter-rouge">S</code> is our starting symbol and so we are done.</p>
 
 <p>Using this, we can define a simple grammar that can perform any arithmetic operation:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>S -&gt; math
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>S -&gt; math
 math -&gt; math '+' math
 math -&gt; math '-' math
 math -&gt; math '*' math
 math -&gt; math '/' math
 math -&gt; NUMBER
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>So here we define <code class="highlighter-rouge">NUMBER</code> as any number, integer, or float. It is in all caps to show that it is not a grammar rule (non-terminal symbol), but a terminal symbol. A Non-Terminal Symbol is a symbol that can be reduced into a form that is a group of terminal symbols. Terminal symbols are the building blocks of the language. These are the lexemes you defined in the lexer. <a href="https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols" target="_blank">In other words, non-terminal symbols can be reduced to other symbols, either terminal or otherwise, while terminal symbols can not</a>.</p>
 
@@ -131,31 +130,28 @@ math -&gt; NUMBER
 
 <p>The first thing we have to do when defining our parsing rules is to import yacc and the lexer tokens into our parsing file. We do this so that the parse understands our tokens. So far your parser file should look like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>import ply.yacc as yacc
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import ply.yacc as yacc
 from src.lexer import tokens
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Next I define a start symbol. Admittedly, I did this because I forgot what the default start symbol is in Ply. That is really as easy as just doing <code class="highlighter-rouge">start = 's'</code>.</p>
 
 <p>At this point your code should look like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>import ply.yacc as yacc
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import ply.yacc as yacc
 from src.lexer import tokens
 
 start = 's'
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Now we can get started on our parser rules. Ply actually makes this <em>incredibly</em> easy.</p>
 
 <p>To define a rule, all we have to do is define a function that starts with <code class="highlighter-rouge">p_</code> and takes in a single parameter <code class="highlighter-rouge">p</code>. Then we define a <a href="http://www.pythonforbeginners.com/basics/python-docstrings" target="_blank">docstring</a> (similar to the token functions in the lexer) that defines the rules. For example, here is what a function that defines one of our math rules from the earlier example would look like:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def p_mathAdd(p):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def p_mathAdd(p):
   '''math : math '+' math'''
   pass
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This is exactly equal to <code class="highlighter-rouge">math -&gt; math '+' math</code>.</p>
 
@@ -165,7 +161,7 @@ start = 's'
 
 <p>Now of course my program is really just a collection of the different types of statements. So the first few rules I define are:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def p_start(p):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def p_start(p):
   '''s : statements'''
   pass
 
@@ -176,8 +172,7 @@ def p_statements(p):
 def p_statement(p):
   '''statement : expression SEMICOLON'''
   pass
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As we recall, I define <code class="highlighter-rouge">s</code> as my starting symbol. So <code class="highlighter-rouge">s</code> can be transformed into <code class="highlighter-rouge">statements</code>. Then statements is really just a combination of <code class="highlighter-rouge">statements</code> and <code class="highlighter-rouge">statement</code>. Finally <code class="highlighter-rouge">statement</code> is an <code class="highlighter-rouge">expression</code> with a <code class="highlighter-rouge">SEMICOLON</code>. <code class="highlighter-rouge">SEMICOLON</code> is a terminal symbol that I defined in me lexer that is, well, a semicolon.</p>
 
@@ -192,7 +187,7 @@ def p_statement(p):
 
 <p>There are two ways you can combine two rules that reduce the same rule. One way, which may be easier to construct your AST, is to define them as separate functions. The above function could also be written as:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def p_add(p):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def p_add(p):
   '''expression : expression PLUS expression'''
   pass
 
@@ -201,8 +196,7 @@ def p_minus(p):
   pass
 
 ...
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Or you can combine them in a single function, separated by a pipe (<code class="highlighter-rouge">|</code>). It really comes down to how you like to do things and your personal preferences. I often use both methods, depending on what I am trying to achieve.</p>
 
@@ -214,14 +208,13 @@ def p_minus(p):
 <h4 id="note-on-errors">Note on errors:</h4>
 <p>You can handle parser errors by defining a <code class="highlighter-rouge">p_error</code> function or by using the <code class="highlighter-rouge">error</code> symbol. The parse object will have line number, but not column number, so you will have to figure that out. I wrote a function to do that that looks like:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def find_column(input, token):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def find_column(input, token):
     last_cr = input.rfind('\n',0,token.lexpos)
     if last_cr &lt; 0:
         last_cr = 0
     column = (token.lexpos - last_cr)
     return column
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>If p is none, that means you hit the end of the file unexpectedly.</p>
 
@@ -308,7 +301,7 @@ def p_minus(p):
       <div class="recent_list">
         
           
-            <a href="/event-driven-programing-in-django/" class="recent_item" style="background-image: url( /assets/img/events-icon.gif )"><span>Event Driven Programing In Django</span></a>
+            <a href="/lets-change-how-we-speak-about-testing/" class="recent_item" style="background-image: url( /assets/img/tdd.jpeg )"><span>From Test Driven Development to Test Driven Design</span></a>
           
         
           

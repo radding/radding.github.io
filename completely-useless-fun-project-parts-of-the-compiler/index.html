@@ -50,6 +50,7 @@
       <div class="post_description">
         <p class="post_meta">2017, Nov 08</p>
         <h1 class="post_title">Completely Useless Fun Project: Parts Of The Compiler</h1>
+        <p class="post_meta"> Reading Time: 14 minutes</p>
       </div>
     </header> <!-- End Header -->
 
@@ -120,7 +121,7 @@
 
 <p>Next I like to set up some code that helps us debugs and one line in particular is very important to the rest of the compiler. At the very bottom of the page, you need to instantiate a lexer. This is easy enough: <code class="highlighter-rouge">lexer = lex.lex()</code>. The <code class="highlighter-rouge">lexer</code> instantiated here is what the parser will use to tokenize your input. This next function, while not required, is essential to be able to run our lexer independently of the parser:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def lex(data):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def lex(data):
     lexer.input(data)
     # Tokenize
     tokens = []
@@ -131,14 +132,13 @@
         tokens.append(tok)
         pass
     return tokens
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Here, data is the string I want to tokenize. What this function does is tokenize the input, iterates until there are no more tokens, and appends the tokens to some list. I use this function to test my lexer in my unit tests (that code can be found here: <a href="https://github.com/radding/Arbor/blob/master/tests/lexer/TestLexer.py" target="_blank"><code class="highlighter-rouge">tests/lexer/TestLexer.py</code></a>), and you can use this function to do what ever you want to the stream of tokens. Another common use is to just print out the individual tokens.</p>
 
 <p>To define our real tokens, we have to do two things. The first is set up a list of tokens called <code class="highlighter-rouge">tokens</code>. These are just the names of the tokens, with out the pattern. Ply uses this list in order to recognize tokens while the lexer is analyzing a string. My list of tokens looks like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>tokens = [
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tokens = [
     "INT",
     "FLOAT",
     "PLUS",
@@ -160,14 +160,13 @@
     'GTE',
     'LTE',
 ]
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>It is a kind of standard to make your token names all upper case, and it also helps you denote what is a parser expression and what is a token when we move on to the parser.</p>
 
-<p>After the list of tokens is defined, you can define your reserved keywords. The easy way to do this is to define a dictionary with your reserved word as the key and the token name as the value. For example, if the only reserved keyword is <code class="highlighter-rouge">foofoo</code> and its token is <code class="highlighter-rouge">FOOFOO</code> then our reserved keyword dict would look like this: <code class="highlighter-rouge"><span class="p">{</span><span class="nt">"foofoo"</span><span class="p">:</span><span class="w"> </span><span class="s2">"FOOFOO"</span><span class="p">}</span></code>. After that dictionary is defined, all we need to do is append it to the tokens list. and that is trivial: <code class="highlighter-rouge">tokens += list(reservedKeyWords.values())</code>. Your code should look similar to this:</p>
+<p>After the list of tokens is defined, you can define your reserved keywords. The easy way to do this is to define a dictionary with your reserved word as the key and the token name as the value. For example, if the only reserved keyword is <code class="highlighter-rouge">foofoo</code> and its token is <code class="highlighter-rouge">FOOFOO</code> then our reserved keyword dict would look like this: <code class="highlighter-rouge">{"foofoo": "FOOFOO"}</code>. After that dictionary is defined, all we need to do is append it to the tokens list. and that is trivial: <code class="highlighter-rouge">tokens += list(reservedKeyWords.values())</code>. Your code should look similar to this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>reserved = {
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reserved = {
     'if' : 'IF',
     'else' : 'ELSE',
     'done' : "DONE",
@@ -181,50 +180,45 @@
 }
 
 tokens += list(reserved.values())
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Finally, we can define the patterns for our tokens. There are two ways we can define a pattern: either using a regular expression string, or by using a function that has a regular expression as its <a href="http://www.pythonforbeginners.com/basics/python-docstrings" target="_blank">docstring</a>. Whether you use a function or a string, both must start with a <code class="highlighter-rouge">t_</code>. So a token to define integers would look like: <code class="highlighter-rouge">t_INT = r'[0-9]+</code>. One important thing to note, is that tokens are resolved in the order the appear. If you have these two rules:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>t_SINGINT = r'[0-9]'
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>t_SINGINT = r'[0-9]'
 t_INT = r'[0-9]+'
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>and you give the lexer this input: <code class="highlighter-rouge">'9'</code> it will resolve to SINGINT, even if they are both valid.</p>
 
 <p>Another thing to consider is when to use functions rather than strings. I use functions when I want to do something a bit more complex than matching. Every other time, I just use strings. For example, handling reserved keywords. The pattern to handle names is <code class="highlighter-rouge">r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'</code>. This will match everything that looks like a variable name. It will match <code class="highlighter-rouge">aBrA32fdfareq_Reqdasf</code> and it will match <code class="highlighter-rouge">return</code>. In order to make sure the token resolves correctly, inside of the <code class="highlighter-rouge">t_NAME</code> function, I have code that checks the dictionary for the word. If the word is resolved, then I change the type of the token. Else I simply keep the token the same. Here is my <code class="highlighter-rouge">t_NAME</code> function:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def t_NAME(t):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def t_NAME(t):
     r'\b[a-zA-Z_]+([a-zA-Z0-9_])*\b'
     print("this is a name:", t.value)
     t.type = reserved.get(t.value, "NAME")
     return t
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>All functions must return a token if you want to use that token later. You can return nothing and that pattern will be ignored (not put on the token stream).</p>
 
 <p>One place this is really useful is comments and tracking line numbers. To track line numbers, I just have a pattern that matches <code class="highlighter-rouge">\n+</code> and adds the number of newlines to the lexer’s lineno variable:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def t_NEWLINE(t):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def t_NEWLINE(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
     pass
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>For comments, I don’t even do anything in the function:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>def t_BLOCKCOMMNET(t):
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def t_BLOCKCOMMNET(t):
     r'/\*(.|\n)*\*/'
     pass
 
 def t_COMMENT(t):
     r'//.*'
     pass
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Two last important things to speak about are ignoring certain characters and handling lexing errors.</p>
 
@@ -312,7 +306,7 @@ def t_COMMENT(t):
       <div class="recent_list">
         
           
-            <a href="/event-driven-programing-in-django/" class="recent_item" style="background-image: url( /assets/img/events-icon.gif )"><span>Event Driven Programing In Django</span></a>
+            <a href="/lets-change-how-we-speak-about-testing/" class="recent_item" style="background-image: url( /assets/img/tdd.jpeg )"><span>From Test Driven Development to Test Driven Design</span></a>
           
         
           

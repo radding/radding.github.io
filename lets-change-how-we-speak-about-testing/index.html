@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>From Test Driven Development to Test Driven Design - Yoseph.TECH | All things Tech</title>
+	<meta name="description" content="Too often when we speak about Test Driven Development, or TDD, we speak about it as if it’s an investment. I think it's time to change the conversation and talk about TDD as if it is an essential engineering step.">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!-- OG tags -->
+	<meta property="og:image" content="/assets/img/tdd.jpeg"/>
+	<meta property="og:title" content="From Test Driven Development to Test Driven Design - Yoseph.TECH | All things Tech" />
+	<meta property='og:description' content='Too often when we speak about Test Driven Development, or TDD, we speak about it as if it’s an investment. I think it's time to change the conversation and talk about TDD as if it is an essential engineering step.'/>
+	<meta property="og:type" content="article" />
+	<meta property='og:url' content='/lets-change-how-we-speak-about-testing/' />
+
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#d25469">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#d25469">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  
+<header class="main_header">
+  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
+  <nav class="main_menu">
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+</header> <!-- End Section Header -->
+
+<main class="post_content">
+  <article class="post">
+    <header>
+      <div class="post_image">
+        <img src=/assets/img/tdd.jpeg alt="From Test Driven Development to Test Driven Design">
+      </div>
+      <div class="post_description">
+        <p class="post_meta">2018, Jul 11</p>
+        <h1 class="post_title">From Test Driven Development to Test Driven Design</h1>
+        <p class="post_meta"> Reading Time: 8 minutes</p>
+      </div>
+    </header> <!-- End Header -->
+
+    <div class="entry_content">
+      <p><a href="https://www.agilealliance.org/glossary/tdd/#q=~(filters~(postType~(~'page~'post~'aa_book~'aa_event_session~'aa_experience_report~'aa_glossary~'aa_research_paper~'aa_video)~tags~(~'tdd))~searchTerm~'~sort~false~sortDirection~'asc~page~1)" target="__blank">Test Driven Development</a> is something that I have been thinking a lot about lately. Well, I haven’t really been thinking about test driven development itself, but rather about why is it that so many developers acknowledge that writing tests is something that will benefit them in the long term, but so few actually write tests. Or if they do write unit tests, they aren’t very good. And how can we as developers improve how we do testing?</p>
+
+<p>In order to improve how Test Driven Development is done, we need to change how we talk about doing TDD.</p>
+
+<h2 id="how-we-currently-talk-about-tdd">How we currently talk about TDD</h2>
+
+<p>All too often, TDD and investment appear in the same sentence, if not the same sentiment. I’m guilty of this, and so is almost every other developer I know. If you are a developer who is working on a side project, or have a hard business deadline coming up, what incentive do you have to focus on long term benefits. Those benefits have to be pretty large for you to want to devote time to work towards those benefits. And let’s be honest, testing doesn’t really provide that big of a benefit long term, because if the benefits did outweigh the costs in time and energy, we would all be writing tests.</p>
+
+<figure>
+  <img src="https://imgs.xkcd.com/comics/automation.png" alt="*As always, there is a relevant XKCD*" class="" />
+  <figcaption><p><em>As always, there is a relevant XKCD</em></p>
+</figcaption>
+</figure>
+
+<p>And therein lies the problem, we talk about TDD as if it is an investment to ensure that our code works after we make changes, but testing offers much more than that. Testing allows you to explore your code design as much, if not more, as it protects your code against bugs and regressions.</p>
+
+<h2 id="test-driven-design-not-test-driven-development">Test Driven <strong>Design</strong> <em>Not</em> Test Driven <strong>Development</strong></h2>
+
+<p>The idea that TDD should be done as a design principle is nothing new. <a href="https://www.agilealliance.org/glossary/tdd/#q=~(filters~(postType~(~'page~'post~'aa_book~'aa_event_session~'aa_experience_report~'aa_glossary~'aa_research_paper~'aa_video)~tags~(~'tdd))~searchTerm~'~sort~false~sortDirection~'asc~page~1)" target="__blank">This article</a>), mentioned Design as a benefit to TDD. <a href="http://www.drdobbs.com/architecture-and-design/test-driven-design/240168102">Here is a Dr. Dobbs article describing TDD as Test Driven <em>Design</em> rather than Test Driven <em>Development</em>.</a>. This conversations already exists, yet the software engineering community <em>still</em> emphasizes TDD’s ability for you to comfortably make changes rather than its use as a design step. So why should the focus be on Test Driven Design, and not Test Driven Development?</p>
+
+<h2 id="why-design-is-important">Why Design is important</h2>
+
+<p>There is an old adage that code is <a href="https://danieljscheufler.wordpress.com/2016/12/27/code-is-read-more-often-than-it-is-written/" target="__blank">read more than it is written</a>. This proverb could be seen in Python’s design philosophy; the first sentence in the eighth PEP (of which there are hundreds) is literally <a href="https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds_{:target=&quot;__blank&quot;}">“code is read much more often than it is written.”</a> This is one of the reasons we use design patterns: they improve readability. They allow us to organize our code in a coherent and organized fashion for other developers to understand.</p>
+
+<figure>
+  <img src="https://i.kym-cdn.com/photos/images/newsfeed/000/548/129/538.jpg" alt="*When you look at unorganized code*" class="" />
+  <figcaption><p><em>When you look at unorganized code</em></p>
+</figcaption>
+</figure>
+<figure>
+  <img src="https://qph.fs.quoracdn.net/main-qimg-ff68a5a9d71c3eea9ae4f9e8fed469d1" alt="*Another relevant XKCD*" class="" />
+  <figcaption><p><em>Another relevant XKCD</em></p>
+</figcaption>
+</figure>
+
+<p>Aside from making code readable, designing our code also allows us to make our code easy to change with minimal side effects, heuristics to write code faster (“I’ll just drop an observer pattern here, a strategy pattern there, and a visitor pattern here”), comfort, and make our code extensible. These are all great qualities to have in our code, but what does this have to do with TDD?</p>
+
+<h2 id="how-testing-relates-to-design">How Testing relates to Design</h2>
+
+<p>Thinking about design first enables us to write good, well structured code. Thinking about testing affords us the opportunity to think about our code’s design before we actually go in and implement it. It gives us the opportunity to think about how our code would be used in a real life scenario, how our code could be extended in the future, and how our code will behave in the wild. All of this is extremely important when you are considering the architecture, design and behaviour of your code.</p>
+
+<p>On of the tenants of testing, at least on of my tenants, is that your tests should mirror how your code will be used and called in production. If you don’t treat tests as basically a client calling your code, you are not testing how that code behaves when it is actually being used. By thinking about how you would like to <em>test</em> your code, it allows you think about how you would like to <em>use</em> it before you implement. This allows software engineers to think about the modules they would need to implement, were that responsibility lies and who should implement what. Every developer should strive to make the most usable application possible, the unit of code that they write is no different.</p>
+
+<p>Another crucial piece of thinking about how your code will be used, is also thinking about how your code will be extended. Testing is a great test of whether your code is extensible. Instead of modifying your code to operate in a test environment, you should be able to add that behaviour in the test environment. The only modifications to your code should be to match the current behaviour that your tests are, well, testing. Think about what and how test behaviour should be <em>injected</em> into your code makes it clear what points of your code may need to be extensible and gives you a good blueprint an how that code can be extended.</p>
+
+<p>And finally, <em>what</em> your code implements, aka the behaviour of the system, is an important aspect of programming in general. Thinking of what behaviour you are testing really just reaffirms and helps you plan your code before it is actually written in stone.</p>
+
+<p>Some of my astute readers will recognize this as the underpinnings of the <a href="https://stackify.com/solid-design-principles/">SOLID Principles</a>.</p>
+
+<h2 id="a-word-of-warning">A Word of Warning</h2>
+
+<p>Firstly, I am not advocating <strong>Test First Development</strong>, something that often gets confused with Test Driven Development. I am not saying that you necessarily write your tests firsts. I am saying that keep testing in mind when you write your code.</p>
+
+<p>Personally, the way I work is I usually just write out what I would like my code to look like, then I write my tests, and finally I fill in the implementation of the code, usually. This allows me to see how the code will look and how it will feel when I will inevitably use it in the future, before too much code is written and it becomes too smelly. If I don’t do that, I will implement a tiny bit of code and then write the tests. This allows me to get my thoughts down on how a certain piece of software will behave before I forget, and still test the look and feel before I implement too much.</p>
+
+<p>But the most important warning I can give is don’t be dogmatic. There are situations where this doesn’t work. Or you feel that it will make your code more complicated. It is important to be able to recognize when and where tests fail you personally and where you should skip tests. Finding the nuances in software engineering is what engineers do.</p>
+
+<h2 id="the-wrap-up">The Wrap Up.</h2>
+
+<p>It is time that we start talking more about testing, its effects on software design, and how thinking about tests first could improve overall software design. We need to stop treating TDD as a task and start talking about it as an approach to software engineering. We need to stop writing tests for the sake of writing tests and start using tests as a way to write down and try out our thoughts before we forget about them or before it becomes too hard to change. If we are writing tests to simply make them pass at any cost, much of the value of tests diminishes and there is less of a focus on writing <em>SOLID</em>, maintainable code, causing more shitty code that somebody (probably you) will have to maintain.</p>
+
+<p>It took sometime to figure this out for myself since I was so focused on the other benefits of TDD. Every conversation about TDD was about how it delivers confidence when you refactor, gives you a working contract that you can use to reimplement behavior, catch bugs before they are released, etc. But no conversations were really about Test Driven <strong>Design</strong>. And while all of those benefits are not small, they give of the feeling as not really delivering immediate value to the programmers. By talking about how we can design our code to better facilitate testing, software will be better designed and the immediate value of testing will be realized. And hopefully testing will become more prevalent.</p>
+
+
+    </div>
+    
+    <div class="post_wrapper">
+      <footer class="post_footer cf">
+        <div class="post_share">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=From Test Driven Development to Test Driven Design&url=http://yoseph.tech/lets-change-how-we-speak-about-testing/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://facebook.com/sharer.php?u=http://yoseph.tech/lets-change-how-we-speak-about-testing/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://plus.google.com/share?url=http://yoseph.tech/lets-change-how-we-speak-about-testing/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+        </div>
+        <div class="post_tag">
+          <span>Tags:</span>
+          
+          <a href="/tags#tdd" class="tag">tdd</a>
+          
+          <a href="/tags#test driven development" class="tag">test driven development</a>
+          
+          <a href="/tags#ci/cd" class="tag">ci/cd</a>
+          
+          <a href="/tags#continuous deployment" class="tag">continuous deployment</a>
+          
+          <a href="/tags#software design" class="tag">software design</a>
+          
+          <a href="/tags#continuous integration" class="tag">continuous integration</a>
+          
+          <a href="/tags#engineering" class="tag">engineering</a>
+          
+          <a href="/tags#software engineering" class="tag">software engineering</a>
+          
+        </div>
+      </footer>
+    </div>
+  </article> <!-- End Section Post -->
+
+  <section class="author cf">
+    <div class="post_wrapper">
+      <div class="author_image">
+        <img src="/assets/img/face.jpg" alt="Author face">
+      </div>
+      <div class="author_info">
+        <h2 class="author_title">Yoseph Radding</h2>
+        <p class="author_subtitle"><p>Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
+</p>
+        <div class="author_social">
+          
+          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
+          
+          
+          
+
+          
+          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="http://yoseph.tech" target="_blank">http://yoseph.tech</a></span>
+          
+          
+            <span>
+              <a href="https://twitter.com/raddingy" target="_blank">
+                <i class="fa fa-twitter" aria-hidden="true"></i> @raddingy
+              </a>
+            </span>
+          
+        </div>
+      </div>
+    </div>
+  </section> <!-- End Section Author -->
+
+  <section class="recent_box">
+    <div class="post_wrapper">
+      <h2 class="recent_title">Recent posts</h2>
+      <div class="recent_list">
+        
+          
+            <a href="/lets-change-how-we-speak-about-testing/" class="recent_item" style="background-image: url( /assets/img/tdd.jpeg )"><span>From Test Driven Development to Test Driven Design</span></a>
+          
+        
+          
+            <a href="/completely-useless-fun-project-building-the-parser/" class="recent_item" style="background-image: url( /assets/img/parser.png )"><span>Completely Useless Fun Project: Building The Parser</span></a>
+          
+        
+          
+            <a href="/completely-useless-fun-project-parts-of-the-compiler/" class="recent_item" style="background-image: url( /assets/img/compilers.jpg )"><span>Completely Useless Fun Project: Parts Of The Compiler</span></a>
+          
+        
+          
+            <a href="/completely-useless-fun-project-build-a-new-programming-language/" class="recent_item" style="background-image: url( /assets/img/programming-languages.jpg )"><span>Completely Useless Fun Project: Building A New Programming Language</span></a>
+          
+        
+          
+            <a href="/building-production-code/" class="recent_item" style="background-image: url( /assets/img/code_screen_shot.jpg )"><span>Building Production Code</span></a>
+          
+        
+          
+            <a href="/building-an-arcade-controller/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building An Arcade Controller</span></a>
+          
+        
+      </div>
+    </div>
+  </section> <!-- End Section Recent Box -->
+  
+  
+<section class="comment_area">
+  <div class="comment_wrapper">
+    
+    <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://yoseph-tech.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                            
+    
+  </div>
+</section> <!-- End Section Comment Area -->
+  
+</main> <!-- End Section Post Content -->
+
+
+<footer class="main_footer">
+  <div class="wrapper">
+    
+<ul class="social_footer">
+  
+  
+    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+  
+  
+  
+    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
+  
+  
+  
+  
+    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+  
+</ul>
+    <div class="copyright">
+      <p>&copy; 2018 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
+      <p><em>All opinions expressed are my own</em></p>
+    </div>
+  </div>
+</footer> <!-- End Section Footer -->
+
+
+  
+<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
+  
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/jquery.vide.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+<script id="dsq-count-scr" src="//yoseph-tech.disqus.com/count.js" async></script>
+<!-- End Javascript -->
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-83670049-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-83670049-2');
+</script>
+
+</body>
+</html>
