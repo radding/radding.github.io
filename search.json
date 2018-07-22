@@ -1,0 +1,75 @@
+[
+  
+    {
+      "title"    : "From Test Driven Development to Test Driven Design",
+      "category" : "",
+      "tags"     : "tdd, test driven development, ci/cd, continuous deployment, software design, continuous integration, engineering, software engineering",
+      "url"      : "/lets-change-how-we-speak-about-testing/",
+      "date"     : "2018-07-11 14:46:44 -0400"
+    } ,
+  
+    {
+      "title"    : "Completely Useless Fun Project: Building The Parser",
+      "category" : "",
+      "tags"     : "programming, Arbor, New Language, Functional, web assembly, arbor, completely useless fun project, parser",
+      "url"      : "/completely-useless-fun-project-building-the-parser/",
+      "date"     : "2017-11-18 06:27:01 -0500"
+    } ,
+  
+    {
+      "title"    : "Completely Useless Fun Project: Parts Of The Compiler",
+      "category" : "",
+      "tags"     : "programming, Arbor, New Language, Functional, web assembly, arbor, completely useless fun project, parser, lexing",
+      "url"      : "/completely-useless-fun-project-parts-of-the-compiler/",
+      "date"     : "2017-11-08 03:04:06 -0500"
+    } ,
+  
+    {
+      "title"    : "Completely Useless Fun Project: Building A New Programming Language",
+      "category" : "",
+      "tags"     : "programming, Arbor, New Language, Functional, web assembly, arbor, completely useless fun project",
+      "url"      : "/completely-useless-fun-project-build-a-new-programming-language/",
+      "date"     : "2017-11-03 04:40:08 -0400"
+    } ,
+  
+    {
+      "title"    : "Building Production Code",
+      "category" : "",
+      "tags"     : "Architecture, Production code, production, programming like a pro, professional",
+      "url"      : "/building-production-code/",
+      "date"     : "2017-10-28 07:32:18 -0400"
+    } ,
+  
+    {
+      "title"    : "Building An Arcade Controller",
+      "category" : "",
+      "tags"     : "RetroPie, DIY, Retro, Gaming, raspberry, pi, mame, retro, arcade,, games",
+      "url"      : "/building-an-arcade-controller/",
+      "date"     : "2017-10-18 20:00:00 -0400"
+    } ,
+  
+    {
+      "title"    : "Building A Raspberry Pi Arcade Machine",
+      "category" : "",
+      "tags"     : "raspberry pi, mame, retro, arcade, games, RetroPie",
+      "url"      : "/building-a-raspberry-pi-arcade-machine/",
+      "date"     : "2017-10-11 16:25:55 -0400"
+    } ,
+  
+    {
+      "title"    : "Relaunching My Blog",
+      "category" : "",
+      "tags"     : "blog, writting, updates, life",
+      "url"      : "/relaunching-my-blog/",
+      "date"     : "2017-10-11 12:47:26 -0400"
+    } ,
+  
+    {
+      "title"    : "Experiences with .NET Core",
+      "category" : "",
+      "tags"     : ".NET, .NET CORE, C#, Web, Technology",
+      "url"      : "/experiences-with-dotnet-core/",
+      "date"     : "2017-02-09 10:00:00 -0500"
+    } 
+  
+]

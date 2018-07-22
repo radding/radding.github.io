@@ -6,56 +6,60 @@
 	<meta name="description" content="Last week, we learned about the history of the compiler and about the lexer. This week we are talking about parsing.">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<!-- OG tags -->
-	<meta property="og:image" content="/assets/img/parser.png"/>
-	<meta property="og:title" content="Completely Useless Fun Project: Building The Parser - Yoseph.TECH | All things Tech" />
-	<meta property='og:description' content='Last week, we learned about the history of the compiler and about the lexer. This week we are talking about parsing.'/>
-	<meta property="og:type" content="article" />
-	<meta property='og:url' content='/completely-useless-fun-project-building-the-parser/' />
-
+	<meta property="og:image" content="">
 	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
 	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
 	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-touch-icon-72x72.png">
 	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-touch-icon-114x114.png">
 	<!-- Chrome, Firefox OS and Opera -->
-	<meta name="theme-color" content="#d25469">
+	<meta name="theme-color" content="#311e3e">
 	<!-- Windows Phone -->
-	<meta name="msapplication-navbutton-color" content="#d25469">
+	<meta name="msapplication-navbutton-color" content="#311e3e">
 	<!-- iOS Safari -->
-	<meta name="apple-mobile-web-app-status-bar-style" content="#d25469">
-	<!-- Fonts -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#311e3e">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<!-- Font Awesome -->
 	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
 	<!-- Styles -->
 	<link rel="stylesheet" href="/assets/css/main.css">
 </head>
 
 <body>
-
-  
-<header class="main_header">
-  <a href="/" class="logo">Yoseph<span>.TECH</span></a>
-  <nav class="main_menu">
-    <a href="/about/">About</a>
-    <a href="/contact/">Contact</a>
-  </nav>
-</header> <!-- End Section Header -->
-
-<main class="post_content">
-  <article class="post">
-    <header>
-      <div class="post_image">
-        <img src=/assets/img/parser.png alt="Completely Useless Fun Project: Building The Parser">
+  <div class="flex-container">
+  <header class="main-header">
+  <div class="wrapper">
+    <div class="header-flex">
+      <div class="menu-icon-container">
+        <span class="menu-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
       </div>
-      <div class="post_description">
-        <p class="post_meta">2017, Nov 18</p>
-        <h1 class="post_title">Completely Useless Fun Project: Building The Parser</h1>
-        <p class="post_meta"> Reading Time: 13 minutes</p>
+      <nav class="main-nav">
+        <span class="menu-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+        </ul>
+      </nav>
+      <p class="logo"><a href="/">yoseph.tech</a></p>
+      <div class="search-icon-container">
+        <span class="search-icon"><a><i class="fa fa-search" aria-hidden="true"></i></a></span>
       </div>
-    </header> <!-- End Header -->
+    </div>
+  </div>
+</header> <!-- End Header -->
 
-    <div class="entry_content">
-      <p>It’s been awhile but I’m ready to get back into it. I was traveling pretty extensively for thanksgiving and didn’t have that much time in front of my computer. I hope everyone had a great thanksgiving!</p>
+  <article class="article-page">
+    <div class="page-image">
+      <div class="cover-image" style="background: url(/assets/img/parser.png) center no-repeat; background-size: cover;"></div>
+    </div>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="header-page">
+          <h1 class="page-title">Completely Useless Fun Project: Building The Parser</h1>
+          <div class="page-date"><time datetime="2017-11-18 06:27:01 -0500">2017, Nov 18 | <i class="fa fa-clock-o" aria-hidden="true"></i><span class="sr-only">Reading Time</span>: 13 minutes </time> </div>
+        </div>
+        <p>It’s been awhile but I’m ready to get back into it. I was traveling pretty extensively for thanksgiving and didn’t have that much time in front of my computer. I hope everyone had a great thanksgiving!</p>
 
 <p>Anyway, <a href="/completely-useless-fun-project-parts-of-the-compiler/" target="_blank">we already spoke about the history, design and implementing a lexer.</a>. This post is going to focus on building the parser.</p>
 
@@ -230,180 +234,171 @@ def p_minus(p):
 
 <p>As always the link to the Arbor project is here: <a href="https://github.com/radding/Arbor" target="_blank">https://github.com/radding/Arbor</a></p>
 
-    </div>
-    
-    <div class="post_wrapper">
-      <footer class="post_footer cf">
-        <div class="post_share">
-          <span>Share:</span>
-          <a href="https://twitter.com/intent/tweet?text=Completely Useless Fun Project: Building The Parser&url=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
-          <a href="https://facebook.com/sharer.php?u=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
-          <a href="https://plus.google.com/share?url=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
-        </div>
-        <div class="post_tag">
-          <span>Tags:</span>
-          
-          <a href="/tags#programming" class="tag">programming</a>
-          
-          <a href="/tags#Arbor" class="tag">Arbor</a>
-          
-          <a href="/tags#New Language" class="tag">New Language</a>
-          
-          <a href="/tags#Functional" class="tag">Functional</a>
-          
-          <a href="/tags#web assembly" class="tag">web assembly</a>
-          
-          <a href="/tags#arbor" class="tag">arbor</a>
-          
-          <a href="/tags#completely useless fun project" class="tag">completely useless fun project</a>
-          
-          <a href="/tags#parser" class="tag">parser</a>
-          
-        </div>
-      </footer>
-    </div>
-  </article> <!-- End Section Post -->
+        <div class="page-footer">
+          <div class="page-tag">
+            <span>Tags:</span>
+            
+            <a href="/tags#programming" class="tag">| programming</a>
+            
+            <a href="/tags#Arbor" class="tag">| Arbor</a>
+            
+            <a href="/tags#New+Language" class="tag">| New Language</a>
+            
+            <a href="/tags#Functional" class="tag">| Functional</a>
+            
+            <a href="/tags#web+assembly" class="tag">| web assembly</a>
+            
+            <a href="/tags#arbor" class="tag">| arbor</a>
+            
+            <a href="/tags#completely+useless+fun+project" class="tag">| completely useless fun project</a>
+            
+            <a href="/tags#parser" class="tag">| parser</a>
+            
+          </div><!-- End Tags -->
+          <div class="page-navigation">
+              
+                <a class="prev" href="/completely-useless-fun-project-parts-of-the-compiler/">&laquo; Previous: Completely Useless Fun Project: Parts Of The Compiler</a>
+              
+              
+                <a class="next" href="/lets-change-how-we-speak-about-testing/"> Next: From Test Driven Development to Test Driven Design &raquo;</a>
+              
+            </div>
 
-  <section class="author cf">
-    <div class="post_wrapper">
-      <div class="author_image">
-        <img src="/assets/img/face.jpg" alt="Author face">
-      </div>
-      <div class="author_info">
-        <h2 class="author_title">Yoseph Radding</h2>
-        <p class="author_subtitle"><p>Entrepreneur, Software Guru, Product Guy, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
+          <div class="page-share">
+            <span>Share:</span>
+            <a href="https://twitter.com/intent/tweet?text=Completely Useless Fun Project: Building The Parser&url=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://facebook.com/sharer.php?u=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+            <a href="https://plus.google.com/share?url=http://yoseph.tech/completely-useless-fun-project-building-the-parser/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google"aria-hidden="true"></i></a>
+          </div><!-- End Share -->
+        </div>
+        <section class="author-box">
+  <img src="/assets/img/face.jpg" alt="Yoseph Radding" class="author-img">
+  <div class="author-desc">
+    <h2>Yoseph Radding</h2>
+    <p><p>Entrepreneur, Software Engineer, Maker, 2017 HackerFellow and most importantly, a <strong>full blown Geek</strong>.</p>
 </p>
-        <div class="author_social">
-          
-          <span class="author_email"><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="mailto:yoseph@shuttl.io">yoseph@shuttl.io</a></span>
-          
-          
-          
+    <ul>
+      
+        <li class="email"><a href="mailto:yoseph@shuttl.io"><i class="fa fa-envelope-o"></i></a></li>
+      
+      
+        <li class="phone"><a href="tel:044 825 5523"><i class="fa fa-phone" aria-hidden="true"></i></a></li>
+      
+      
+        <li class="website"><a href="http://yoseph.tech" target="_blank"><i class="fa fa-globe"></i></a></li>
+      
+      
+        <li class="twitter"><a href="https://twitter.com/@raddingy" target="_blank"><i class="fa fa-twitter"></i></a></li>
+      
+    </ul>
+  </div>
+</section>
 
-          
-          <span class="author_website"><i class="fa fa-link" aria-hidden="true"></i> <a href="http://yoseph.tech" target="_blank">http://yoseph.tech</a></span>
-          
-          
-            <span>
-              <a href="https://twitter.com/raddingy" target="_blank">
-                <i class="fa fa-twitter" aria-hidden="true"></i> @raddingy
-              </a>
-            </span>
-          
-        </div>
-      </div>
-    </div>
-  </section> <!-- End Section Author -->
-
-  <section class="recent_box">
-    <div class="post_wrapper">
-      <h2 class="recent_title">Recent posts</h2>
-      <div class="recent_list">
-        
-          
-            <a href="/lets-change-how-we-speak-about-testing/" class="recent_item" style="background-image: url( /assets/img/tdd.jpeg )"><span>From Test Driven Development to Test Driven Design</span></a>
-          
-        
-          
-            <a href="/completely-useless-fun-project-building-the-parser/" class="recent_item" style="background-image: url( /assets/img/parser.png )"><span>Completely Useless Fun Project: Building The Parser</span></a>
-          
-        
-          
-            <a href="/completely-useless-fun-project-parts-of-the-compiler/" class="recent_item" style="background-image: url( /assets/img/compilers.jpg )"><span>Completely Useless Fun Project: Parts Of The Compiler</span></a>
-          
-        
-          
-            <a href="/completely-useless-fun-project-build-a-new-programming-language/" class="recent_item" style="background-image: url( /assets/img/programming-languages.jpg )"><span>Completely Useless Fun Project: Building A New Programming Language</span></a>
-          
-        
-          
-            <a href="/building-production-code/" class="recent_item" style="background-image: url( /assets/img/code_screen_shot.jpg )"><span>Building Production Code</span></a>
-          
-        
-          
-            <a href="/building-an-arcade-controller/" class="recent_item" style="background-image: url( /assets/img/rpi_arcade1.png )"><span>Building An Arcade Controller</span></a>
-          
-        
-      </div>
-    </div>
-  </section> <!-- End Section Recent Box -->
-  
-  
-<section class="comment_area">
-  <div class="comment_wrapper">
+        <div class="recent-box">
+  <h2 class="recent-title">Recent post</h2>
+  <div class="recent-list">
     
-    <div id="disqus_thread"></div>
-<script>
-
-/**
-*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-/*
-var disqus_config = function () {
-this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-};
-*/
-(function() { // DON'T EDIT BELOW THIS LINE
-var d = document, s = d.createElement('script');
-s.src = 'https://yoseph-tech.disqus.com/embed.js';
-s.setAttribute('data-timestamp', +new Date());
-(d.head || d.body).appendChild(s);
-})();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                            
+      
+        <a href="/lets-change-how-we-speak-about-testing/" class="recent-item" style="background: url(/assets/img/tdd.jpeg) center no-repeat; background-size: cover;"><span>From Test Driven Development to Test Driven Design</span></a>
+      
+    
+      
+        <a href="/completely-useless-fun-project-building-the-parser/" class="recent-item" style="background: url(/assets/img/parser.png) center no-repeat; background-size: cover;"><span>Completely Useless Fun Project: Building The Parser</span></a>
+      
+    
+      
+        <a href="/completely-useless-fun-project-parts-of-the-compiler/" class="recent-item" style="background: url(/assets/img/compilers.jpg) center no-repeat; background-size: cover;"><span>Completely Useless Fun Project: Parts Of The Compiler</span></a>
+      
+    
+      
+        <a href="/completely-useless-fun-project-build-a-new-programming-language/" class="recent-item" style="background: url(/assets/img/programming-languages.jpg) center no-repeat; background-size: cover;"><span>Completely Useless Fun Project: Building A New Programming Language</span></a>
+      
     
   </div>
-</section> <!-- End Section Comment Area -->
-  
-</main> <!-- End Section Post Content -->
+</div> <!-- End Recent-Box -->
 
+        <div class="newsletter" id="mc_embed_signup">
+  <h2 class="newsletter-title">Newsletter</h2>
+  <div class="form-container">
+    <p>Subscribe here to get our latest updates</p>
+    <form action="//tech.us16.list-manage.com/subscribe/post?u=465600c4f525ed3e9efc9ee60&amp;id=d13aa71182" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+      <label class="screen-reader-text" for="mce-EMAIL">Email Address</label>
+      <div class="newsletter-box" id="mc_embed_signup_scroll">
+        <input type="email" name="EMAIL" placeholder="Email address" class="email-input" id="mce-EMAIL" required>
+        <input type="submit" value="Subscribe" name="subscribe" class="subscribe-btn" id="mc-embedded-subscribe">
+      </div>
+    </form>
+  </div>
+</div> <!-- End Newsletter -->
 
-<footer class="main_footer">
+        <section class="comment-area">
+  <div class="comment-wrapper">
+    
+    <div id="disqus_thread" class="article-comments"></div>
+    <script>
+      (function() {
+          var d = document, s = d.createElement('script');
+          s.src = '//yoseph-tech.disqus.com.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    
+  </div>
+</section> <!-- End Comment Area -->
+
+      </div>
+    </div> <!-- End Wrapper -->
+  </article>
+  <div class="search-box">
   <div class="wrapper">
-    
-<ul class="social_footer">
-  
-  
-    <li><a href="https://twitter.com/raddingy" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
-  
-  
-  
-    <li><a href="https://www.linkedin.com/in/yosephradding/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
-  
-  
-  
-  
-    <li><a href="https://github.com/radding" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a></li>
-  
-</ul>
-    <div class="copyright">
-      <p>&copy; 2018 All rights reserved. Yoseph Radding. Design by <a href="https://artemsheludko.github.io" target="_blank">Artem Sheludko</a></p>
-      <p><em>All opinions expressed are my own</em></p>
+    <div class="search-grid">
+      <form class="search-form">
+        <div id="search-container">
+          <input type="text" id="search-input" class="search" placeholder="Search">
+        </div>
+      </form>
+      <ul id="results-container" class="results-search"></ul>
+      <div class="icon-close-container">
+        <span class="search-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>
     </div>
   </div>
-</footer> <!-- End Section Footer -->
+</div>
 
+  <footer class="main-footer">
+  <div class="copyright">
+    <p>2018 &copy; Yoseph Radding</p>
+  </div>
+</footer> <!-- End Footer -->
 
-  
-<div class="top" title="Top"><i class="fa fa-chevron-up" aria-hidden="true"></i></div> <!-- End Top Scroll -->
-  
+</div>
+
+  <!-- JS -->
 <script src="/assets/js/jquery-3.2.1.min.js"></script>
-<script src="/assets/js/jquery.vide.min.js"></script>
-<script src="/assets/js/custom.js"></script>
-<script id="dsq-count-scr" src="//yoseph-tech.disqus.com/count.js" async></script>
-<!-- End Javascript -->
-
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-83670049-2"></script>
+<script src="/assets/js/jekyll-search.js"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-83670049-2');
+  SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/search.json',
+    searchResultTemplate: '<li><a href="{url}" title="{desc}">{title}</a></li>',
+    noResultsText: 'No results found',
+    fuzzy: false,
+    exclude: ['Welcome']
+  });
 </script>
+<script src="/assets/js/main.js"></script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-83670049-2', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
 
 </body>
 </html>
